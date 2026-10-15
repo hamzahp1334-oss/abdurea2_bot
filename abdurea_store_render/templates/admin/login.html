@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — {{ settings.store_name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 20%, #e0f2fe 0%, #edf6ff 50%, #f0f7ff 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+  <div class="w-full max-w-md bg-white border border-sky-100 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+    <!-- Glowing Accent Top Bar -->
+    <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#007BFF] via-[#00D2FF] to-[#80E0E0]"></div>
+
+    <div class="text-center mb-8 pt-2">
+      <img src="{{ settings.store_logo_url or '/static/images/logo.png' }}" alt="{{ settings.store_name }}" class="h-10 mx-auto mb-3 object-contain">
+      <h1 class="text-xl font-black text-slate-900">Store Management Console</h1>
+      <p class="text-xs text-slate-500 mt-1">Simple &amp; secure control for ABDUREA STORE</p>
+    </div>
+
+    {% if error %}
+    <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+      <span>⚠️</span>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/admin/login" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Admin Username</label>
+        <input type="text" name="username" required autofocus placeholder="admin"
+               class="admin-input w-full font-medium">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+        <input type="password" name="password" required placeholder="••••••••"
+               class="admin-input w-full font-medium">
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="btn-sexy-blue w-full !py-3 text-sm font-bold shadow-lg">
+          Sign In to Dashboard →
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-6 pt-6 border-t border-slate-100 text-center">
+      <a href="/" class="text-xs text-slate-500 hover:text-sky-600 font-semibold transition-colors">
+        ← Visit Public Store
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

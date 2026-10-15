@@ -1,0 +1,79 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Bot Content & Policies{% endblock %}
+{% block header_title %}Bot Messages & Legal Policies{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl">
+
+  <!-- Header -->
+  <div class="admin-card p-5 flex items-center justify-between">
+    <div>
+      <h3 class="text-base font-extrabold text-slate-900">Customer Bot Messaging &amp; Policies</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Customize greeting texts, terms of service, fulfillment guidelines, and privacy policies in real time.</p>
+    </div>
+    <span class="badge-status badge-ice text-[10px]">
+      Live Bot Sync
+    </span>
+  </div>
+
+  <form method="POST" action="/admin/bot-content/save" class="space-y-6 text-xs">
+
+    <!-- Welcome Text -->
+    <div class="admin-card p-6 space-y-3">
+      <div>
+        <label class="block text-sm font-extrabold text-slate-900">
+          Telegram Bot Welcome Intro Message (/start)
+        </label>
+        <p class="text-xs text-slate-500 mt-0.5">Displayed immediately when a customer taps <code class="text-sky-700 font-bold">/start</code> in Telegram.</p>
+      </div>
+      <textarea name="welcome_intro_text" rows="4" required
+                class="w-full admin-input font-medium leading-relaxed">{{ settings.welcome_intro_text or '' }}</textarea>
+    </div>
+
+    <!-- Fulfillment Policy -->
+    <div class="admin-card p-6 space-y-3">
+      <div>
+        <label class="block text-sm font-extrabold text-slate-900">
+          Fulfillment &amp; Delivery Policy (/terms)
+        </label>
+        <p class="text-xs text-slate-500 mt-0.5">Explains realistic delivery windows (e.g. 30-120 minutes) and activation instructions.</p>
+      </div>
+      <textarea name="fulfillment_policy" rows="3" required
+                class="w-full admin-input font-medium leading-relaxed">{{ settings.fulfillment_policy or '' }}</textarea>
+    </div>
+
+    <!-- Refund Policy -->
+    <div class="admin-card p-6 space-y-3">
+      <div>
+        <label class="block text-sm font-extrabold text-slate-900">
+          Telegram Stars Refund Policy (/terms)
+        </label>
+        <p class="text-xs text-slate-500 mt-0.5">Clear conditions under which Telegram Stars (XTR) refunds are processed.</p>
+      </div>
+      <textarea name="refund_policy" rows="3" required
+                class="w-full admin-input font-medium leading-relaxed">{{ settings.refund_policy or '' }}</textarea>
+    </div>
+
+    <!-- Privacy Policy -->
+    <div class="admin-card p-6 space-y-3">
+      <div>
+        <label class="block text-sm font-extrabold text-slate-900">
+          Privacy &amp; Data-Handling Notice (/privacy)
+        </label>
+        <p class="text-xs text-slate-500 mt-0.5">Explains why customer name and email are gathered exclusively for provisioning digital licenses.</p>
+      </div>
+      <textarea name="privacy_policy" rows="3" required
+                class="w-full admin-input font-medium leading-relaxed">{{ settings.privacy_policy or '' }}</textarea>
+    </div>
+
+    <div class="pt-2">
+      <button type="submit" class="btn-sexy-blue py-3 px-8 text-xs font-bold">
+        Save All Bot Content & Policies
+      </button>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

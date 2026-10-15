@@ -1,0 +1,105 @@
+﻿{% extends "admin/layout.html" %}
+
+{% block title %}Telegram & Payment Settings{% endblock %}
+{% block header_title %}Telegram & Payment Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl space-y-6">
+  <div>
+    <h2 class="text-xl font-bold text-slate-100">Telegram & Ethiopian Payment Configuration</h2>
+    <p class="text-xs text-slate-400 mt-0.5">Configure official order links, prefilled chat text, Telebirr, CBEBirr, and CBE bank transfer accounts</p>
+  </div>
+
+  <form method="POST" action="/admin/telegram/save" class="space-y-6 text-xs">
+    <!-- Telegram Section -->
+    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">💬</span>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-200">Official Telegram Order Channels</h3>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Telegram Handle / Username *</label>
+          <input type="text" name="telegram_username" value="{{ settings.telegram_username }}" required placeholder="@trust994" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500 font-mono">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Telegram Order URL *</label>
+          <input type="url" name="telegram_order_link" value="{{ settings.telegram_order_link }}" required placeholder="https://t.me/abdurea1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500 font-mono">
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Default Order Message Template</label>
+        <input type="text" name="telegram_default_message" value="{{ settings.telegram_default_message }}" placeholder="Hello ABDUREA STORE, I want to order {service} — {plan} ({price} ETB)." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500">
+        <p class="text-[11px] text-slate-500 mt-1">
+          Supported variables: <code class="text-sky-400 font-mono">{service}</code>, <code class="text-sky-400 font-mono">{plan}</code>, <code class="text-sky-400 font-mono">{price}</code>. Automatically fills when customers tap "Order on Telegram".
+        </p>
+      </div>
+    </div>
+
+    <!-- Ethiopian Payment Accounts Section -->
+    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🇪🇹</span>
+        <div>
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-200">Ethiopian Local Payment Accounts</h3>
+          <p class="text-[11px] text-slate-400">Displayed on checkout drawers for direct mobile/bank transfers</p>
+        </div>
+      </div>
+
+      <!-- Telebirr -->
+      <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
+        <span class="font-bold text-sky-400 text-xs uppercase block">Telebirr Mobile Payment</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Telebirr Phone Number</label>
+            <input type="text" name="telebirr_number" value="{{ settings.telebirr_number }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Account Holder Name</label>
+            <input type="text" name="telebirr_name" value="{{ settings.telebirr_name }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-bold">
+          </div>
+        </div>
+      </div>
+
+      <!-- CBEBirr -->
+      <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
+        <span class="font-bold text-purple-400 text-xs uppercase block">CBEBirr Mobile Payment</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">CBEBirr Mobile Number</label>
+            <input type="text" name="cbebirr_number" value="{{ settings.cbebirr_number }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Account Holder Name</label>
+            <input type="text" name="cbebirr_name" value="{{ settings.cbebirr_name }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-bold">
+          </div>
+        </div>
+      </div>
+
+      <!-- CBE Bank -->
+      <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
+        <span class="font-bold text-amber-400 text-xs uppercase block">Commercial Bank of Ethiopia (CBE) Transfer</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">CBE Account Number</label>
+            <input type="text" name="cbe_account" value="{{ settings.cbe_account }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Account Holder Name</label>
+            <input type="text" name="cbe_name" value="{{ settings.cbe_name }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-bold">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button type="submit" class="btn-telegram-primary px-7 py-3 rounded-xl font-bold text-xs">
+        Save Telegram & Payment Settings
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block title %}Products — Abdurea Store{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Product</h1>
+
+  <div class="page-controls">
+    <div class="select-control">
+      <span>Showing</span>
+      <select id="showingSelect" style="border:none; background:transparent; font-weight:700; color:var(--text-main); outline:none;">
+        <option>10</option>
+        <option>25</option>
+        <option>50</option>
+      </select>
+    </div>
+
+    <button class="btn-secondary" onclick="toggleFilterMenu()">
+      <i data-feather="filter" style="width: 14px; height: 14px;"></i>
+      <span>Filter</span>
+    </button>
+
+    <button class="btn-secondary" onclick="exportProductsCSV()">
+      <i data-feather="upload" style="width: 14px; height: 14px;"></i>
+      <span>Export</span>
+    </button>
+
+    <button class="btn-primary" onclick="openAddProductModal()">
+      <i data-feather="plus" style="width: 16px; height: 16px;"></i>
+      <span>+ Add New Product</span>
+    </button>
+  </div>
+</div>
+
+<!-- Table matching the user's uploaded mockup -->
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="modern-table" id="productsTable">
+      <thead>
+        <tr>
+          <th>Product Name <span class="sort-icon">↕</span></th>
+          <th>Product ID <span class="sort-icon">↕</span></th>
+          <th>Price <span class="sort-icon">↕</span></th>
+          <th>Stock <span class="sort-icon">↕</span></th>
+          <th>Type <span class="sort-icon">↕</span></th>
+          <th>Status <span class="sort-icon">↕</span></th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr id="prod-row-{{ p.id }}">
+          <td>
+            <div class="item-cell">
+              <div class="item-thumb">
+                {% if p.category == 'AI Tools' %}🤖
+                {% elif p.category == 'Design' %}🎨
+                {% elif p.category == 'Video Editing' %}🎬
+                {% elif p.category == 'Streaming' %}📺
+                {% else %}⭐{% endif %}
+              </div>
+              <div>
+                <div class="item-name">{{ p.name }}</div>
+                <div class="item-code">{{ p.duration }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="color: var(--text-muted); font-weight: 600;">#{{ p.product_code or ('PRD-' ~ p.id) }}</td>
+          <td style="font-weight: 700;">{{ p.price }} ETB</td>
+          <td style="color: var(--text-muted);">{{ p.stock }} pcs</td>
+          <td style="color: var(--text-muted);">{{ p.category }}</td>
+          <td>
+            {% if p.status == 'active' %}
+              <span class="status-pill status-active">Active</span>
+            {% elif p.status == 'pending' %}
+              <span class="status-pill status-pending">Pending</span>
+            {% elif p.status == 'on_sale' %}
+              <span class="status-pill status-onsale">On Sale</span>
+            {% elif p.status == 'inactive' %}
+              <span class="status-pill status-inactive">Inactive</span>
+            {% else %}
+              <span class="status-pill status-purple">{{ p.status|capitalize }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;">
+            <button class="action-more-btn" onclick="openEditProductModal({{ p.id }})" title="Edit Product">
+              <i data-feather="edit-2" style="width: 15px; height: 15px;"></i>
+            </button>
+            <button class="action-more-btn" onclick="deleteProduct({{ p.id }}, '{{ p.name }}')" title="Delete Product" style="color: #ef4444;">
+              <i data-feather="trash-2" style="width: 15px; height: 15px;"></i>
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination footer -->
+  <div class="pagination-wrapper">
+    <a class="page-nav-link" href="#">&lt; Previous</a>
+    <div class="page-numbers">
+      <span class="page-num">01</span>
+      <span class="page-num">02</span>
+      <span class="page-num active">03</span>
+      <span class="page-num">04</span>
+      <span class="page-num" style="cursor: default;">...</span>
+      <span class="page-num">10</span>
+      <span class="page-num">11</span>
+    </div>
+    <a class="page-nav-link" href="#">Next &gt;</a>
+  </div>
+</div>
+
+<!-- Modal: Add New Product -->
+<div class="modal-overlay" id="addProductModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Add New Pro Service</h3>
+      <button class="modal-close" onclick="closeModal('addProductModal')">&times;</button>
+    </div>
+    <form id="addProductForm" onsubmit="submitAddProduct(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Service / Product Name</label>
+          <input type="text" id="addName" class="form-input" placeholder="e.g. Gemini Advanced Pro / Canva Pro" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Category / Type</label>
+            <select id="addCategory" class="form-select">
+              <option value="AI Tools">AI Tools</option>
+              <option value="Design">Design</option>
+              <option value="Video Editing">Video Editing</option>
+              <option value="Streaming">Streaming</option>
+              <option value="Subscription">Subscription</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price (ETB)</label>
+            <input type="number" step="0.5" id="addPrice" class="form-input" placeholder="e.g. 350" required>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Duration / Validity</label>
+            <input type="text" id="addDuration" class="form-input" placeholder="e.g. 1 Month, 1 Year" value="1 Month">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock Units</label>
+            <input type="number" id="addStock" class="form-input" value="100">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Status</label>
+          <select id="addStatus" class="form-select">
+            <option value="active">Active</option>
+            <option value="on_sale">On Sale</option>
+            <option value="pending">Pending</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service Description</label>
+          <textarea id="addDescription" class="form-textarea" rows="3" placeholder="Features, warranty, activation steps..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('addProductModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Edit Product -->
+<div class="modal-overlay" id="editProductModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Product</h3>
+      <button class="modal-close" onclick="closeModal('editProductModal')">&times;</button>
+    </div>
+    <form id="editProductForm" onsubmit="submitEditProduct(event)">
+      <input type="hidden" id="editProdId">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Product Name</label>
+          <input type="text" id="editName" class="form-input" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input type="text" id="editCategory" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price (ETB)</label>
+            <input type="number" step="0.5" id="editPrice" class="form-input" required>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <input type="text" id="editDuration" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock</label>
+            <input type="number" id="editStock" class="form-input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="editStatus" class="form-select">
+            <option value="active">Active</option>
+            <option value="on_sale">On Sale</option>
+            <option value="pending">Pending</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="editDescription" class="form-textarea" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('editProductModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Update Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openAddProductModal() {
+    document.getElementById('addProductModal').classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  async function submitAddProduct(e) {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('addName').value,
+      category: document.getElementById('addCategory').value,
+      price: document.getElementById('addPrice').value,
+      duration: document.getElementById('addDuration').value,
+      stock: document.getElementById('addStock').value,
+      status: document.getElementById('addStatus').value,
+      description: document.getElementById('addDescription').value
+    };
+
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        showToast('Product added successfully!');
+        closeModal('addProductModal');
+        setTimeout(() => location.reload(), 600);
+      } else {
+        alert(result.message || 'Error creating product');
+      }
+    } catch (err) {
+      alert('Network error adding product');
+    }
+  }
+
+  async function openEditProductModal(id) {
+    try {
+      const res = await fetch(`/api/products/${id}`);
+      const data = await res.json();
+      if (data.status === 'success') {
+        const p = data.product;
+        document.getElementById('editProdId').value = p.id;
+        document.getElementById('editName').value = p.name;
+        document.getElementById('editCategory').value = p.category;
+        document.getElementById('editPrice').value = p.price;
+        document.getElementById('editDuration').value = p.duration;
+        document.getElementById('editStock').value = p.stock;
+        document.getElementById('editStatus').value = p.status;
+        document.getElementById('editDescription').value = p.description || '';
+        document.getElementById('editProductModal').classList.add('active');
+      }
+    } catch (err) {
+      alert('Error fetching product details');
+    }
+  }
+
+  async function submitEditProduct(e) {
+    e.preventDefault();
+    const id = document.getElementById('editProdId').value;
+    const data = {
+      name: document.getElementById('editName').value,
+      category: document.getElementById('editCategory').value,
+      price: document.getElementById('editPrice').value,
+      duration: document.getElementById('editDuration').value,
+      stock: document.getElementById('editStock').value,
+      status: document.getElementById('editStatus').value,
+      description: document.getElementById('editDescription').value
+    };
+
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        showToast('Product updated successfully!');
+        closeModal('editProductModal');
+        setTimeout(() => location.reload(), 600);
+      } else {
+        alert('Error updating product');
+      }
+    } catch (err) {
+      alert('Network error');
+    }
+  }
+
+  async function deleteProduct(id, name) {
+    if (!confirm(`Are you sure you want to remove "${name}" from your catalog?`)) return;
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.status === 'success') {
+        showToast(`"${name}" deleted.`);
+        const row = document.getElementById(`prod-row-${id}`);
+        if (row) row.remove();
+      }
+    } catch (err) {
+      alert('Error deleting product');
+    }
+  }
+
+  function exportProductsCSV() {
+    window.open('/api/products', '_blank');
+  }
+
+  function toggleFilterMenu() {
+    showToast('Filter: Showing all active catalog items');
+  }
+</script>
+{% endblock %}

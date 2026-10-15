@@ -1,0 +1,112 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Customer Reviews{% endblock %}
+{% block header_title %}Customer Reviews Moderation{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Status filter header -->
+  <div class="admin-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h3 class="text-base font-extrabold text-slate-900">Customer Ratings &amp; Reviews</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Reviews submitted by verified customers via the Telegram Bot after receiving their order.</p>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="flex items-center gap-1.5 text-xs font-semibold p-1 rounded-2xl bg-slate-100 border border-slate-200">
+      <a href="/admin/reviews" class="px-3 py-1.5 rounded-xl transition-all {% if not current_status %}bg-white text-sky-700 shadow-sm font-bold{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+        All
+      </a>
+      <a href="/admin/reviews?status=pending" class="px-3 py-1.5 rounded-xl transition-all {% if current_status == 'pending' %}bg-white text-amber-700 shadow-sm font-bold{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+        Pending
+      </a>
+      <a href="/admin/reviews?status=published" class="px-3 py-1.5 rounded-xl transition-all {% if current_status == 'published' %}bg-white text-emerald-700 shadow-sm font-bold{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+        Published
+      </a>
+      <a href="/admin/reviews?status=rejected" class="px-3 py-1.5 rounded-xl transition-all {% if current_status == 'rejected' %}bg-white text-rose-700 shadow-sm font-bold{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+        Rejected
+      </a>
+    </div>
+  </div>
+
+  <!-- Reviews List -->
+  <div class="admin-card overflow-hidden">
+    {% if reviews %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-700">
+        <thead class="text-slate-500 uppercase bg-slate-50 border-b border-slate-200 text-[10px] font-bold tracking-wider">
+          <tr>
+            <th class="py-3.5 px-5">Service</th>
+            <th class="py-3.5 px-5">Customer</th>
+            <th class="py-3.5 px-5">Rating</th>
+            <th class="py-3.5 px-5">Customer Review</th>
+            <th class="py-3.5 px-5">Order Reference</th>
+            <th class="py-3.5 px-5 text-center">Status</th>
+            <th class="py-3.5 px-5 text-right">Moderation Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          {% for r in reviews %}
+          <tr class="hover:bg-sky-50/40 transition-colors">
+            <td class="py-4 px-5 font-bold text-slate-900 text-sm whitespace-nowrap">{{ r.service_name }}</td>
+            <td class="py-4 px-5 whitespace-nowrap">
+              <div class="font-bold text-slate-800">{{ r.customer_name }}</div>
+              <div class="text-[11px] text-slate-400 font-mono">TG: {{ r.telegram_id }}</div>
+            </td>
+            <td class="py-4 px-5 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1 text-amber-500 font-extrabold text-sm">
+                {% for i in range(r.rating) %}⭐{% endfor %}
+                <span class="text-xs text-slate-600 font-semibold ml-1">({{ r.rating }}/5)</span>
+              </span>
+            </td>
+            <td class="py-4 px-5 text-slate-700 max-w-sm">
+              <div class="line-clamp-2 text-xs leading-relaxed">
+                {{ r.comment or '<em>No comment left</em>'|safe }}
+              </div>
+            </td>
+            <td class="py-4 px-5 font-mono text-sky-700 text-xs whitespace-nowrap">
+              <a href="/admin/orders?q={{ r.order_ref }}" class="hover:underline font-bold">{{ r.order_ref }}</a>
+            </td>
+            <td class="py-4 px-5 text-center whitespace-nowrap">
+              {% if r.status == 'published' %}
+                <span class="badge-status badge-paid text-[10px]">Published</span>
+              {% elif r.status == 'pending' %}
+                <span class="badge-status badge-processing text-[10px]">Pending</span>
+              {% else %}
+                <span class="badge-status badge-refunded text-[10px]">Rejected</span>
+              {% endif %}
+            </td>
+            <td class="py-4 px-5 text-right space-x-1.5 whitespace-nowrap">
+              {% if r.status != 'published' %}
+              <form method="POST" action="/admin/reviews/{{ r.id }}/update" class="inline">
+                <input type="hidden" name="status" value="published">
+                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs border border-emerald-200 transition-colors">
+                  ✓ Publish
+                </button>
+              </form>
+              {% endif %}
+              {% if r.status != 'rejected' %}
+              <form method="POST" action="/admin/reviews/{{ r.id }}/update" class="inline">
+                <input type="hidden" name="status" value="rejected">
+                <button type="submit" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition-colors">
+                  ✕ Reject
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-slate-500 text-xs">
+      <p class="font-semibold text-slate-700 text-sm">No reviews found</p>
+      <p class="text-slate-400 mt-1">There are currently no reviews matching this filter.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

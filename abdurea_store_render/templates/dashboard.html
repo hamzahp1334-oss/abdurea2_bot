@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Abdurea Store{% endblock %}
+
+{% block content %}
+<div class="page-title-section">
+  <div>
+    <h1 class="page-heading">Dashboard</h1>
+    <p class="page-subtitle">Overview of your store</p>
+  </div>
+</div>
+
+<!-- 9 Metric Cards (Exact match to Image 1) -->
+<div class="metrics-dashboard-grid">
+  <!-- 1. Total Services -->
+  <div class="stat-card-v2" onclick="location.href='{{ url_for('products_view') }}'" style="cursor: pointer;">
+    <div class="squircle-icon squircle-blue">
+      <i data-feather="box" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.total_services }}</div>
+    <div class="stat-v2-label">Total Services</div>
+  </div>
+
+  <!-- 2. Active Services -->
+  <div class="stat-card-v2" onclick="location.href='{{ url_for('products_view') }}'" style="cursor: pointer;">
+    <div class="squircle-icon squircle-green">
+      <i data-feather="check-circle" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.active_services }}</div>
+    <div class="stat-v2-label">Active Services</div>
+  </div>
+
+  <!-- 3. Unavailable -->
+  <div class="stat-card-v2" onclick="location.href='{{ url_for('products_view') }}'" style="cursor: pointer;">
+    <div class="squircle-icon squircle-rose">
+      <i data-feather="x-circle" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.unavailable_services }}</div>
+    <div class="stat-v2-label">Unavailable</div>
+  </div>
+
+  <!-- 4. Categories -->
+  <div class="stat-card-v2" onclick="location.href='{{ url_for('products_view') }}'" style="cursor: pointer;">
+    <div class="squircle-icon squircle-royal">
+      <i data-feather="tag" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.categories_count }}</div>
+    <div class="stat-v2-label">Categories</div>
+  </div>
+
+  <!-- 5. Featured -->
+  <div class="stat-card-v2" onclick="location.href='{{ url_for('products_view') }}'" style="cursor: pointer;">
+    <div class="squircle-icon squircle-orange">
+      <i data-feather="star" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.featured_count or 5 }}</div>
+    <div class="stat-v2-label">Featured</div>
+  </div>
+
+  <!-- 6. Order Clicks -->
+  <div class="stat-card-v2">
+    <div class="squircle-icon squircle-sky">
+      <i data-feather="shopping-cart" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.order_clicks }}</div>
+    <div class="stat-v2-label">Order Clicks</div>
+  </div>
+
+  <!-- 7. Total Views -->
+  <div class="stat-card-v2">
+    <div class="squircle-icon squircle-cyan">
+      <i data-feather="eye" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.total_views }}</div>
+    <div class="stat-v2-label">Total Views</div>
+  </div>
+
+  <!-- 8. Total Orders -->
+  <div class="stat-card-v2" onclick="location.href='{{ url_for('orders_view') }}'" style="cursor: pointer;">
+    <div class="squircle-icon squircle-teal">
+      <i data-feather="shopping-bag" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number">{{ stats.total_orders }}</div>
+    <div class="stat-v2-label">Total Orders</div>
+  </div>
+
+  <!-- 9. Pending Orders -->
+  <div class="stat-card-v2" onclick="location.href='{{ url_for('orders_view') }}'" style="cursor: pointer;">
+    <div class="squircle-icon squircle-amber">
+      <i data-feather="clock" style="width: 20px; height: 20px;"></i>
+    </div>
+    <div class="stat-v2-number" style="color: #ea580c;">{{ stats.pending_orders }}</div>
+    <div class="stat-v2-label">Pending Orders</div>
+  </div>
+</div>
+{% endblock %}

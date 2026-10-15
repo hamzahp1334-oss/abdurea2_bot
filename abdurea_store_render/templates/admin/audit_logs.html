@@ -1,0 +1,65 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Audit Logs{% endblock %}
+{% block header_title %}Administrative Audit Trail{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+    <div>
+      <h3 class="text-sm font-bold text-slate-100">Immutable Administrative Activity Log</h3>
+      <p class="text-xs text-slate-400 mt-0.5">Records all price adjustments, fulfillment status changes, Stars refunds, and logins.</p>
+    </div>
+    <span class="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs">
+      {{ logs|length }} Entries
+    </span>
+  </div>
+
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+    {% if logs %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-300">
+        <thead>
+          <tr class="border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider bg-slate-950/40">
+            <th class="py-3 px-4">Timestamp</th>
+            <th class="py-3 px-4">Admin User</th>
+            <th class="py-3 px-4">Action</th>
+            <th class="py-3 px-4">Target</th>
+            <th class="py-3 px-4">Details</th>
+            <th class="py-3 px-4">IP Address</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800/60 font-mono text-[11px]">
+          {% for l in logs %}
+          <tr class="hover:bg-slate-800/40 transition-colors">
+            <td class="py-3 px-4 text-slate-400 whitespace-nowrap">{{ l.created_at }}</td>
+            <td class="py-3 px-4 font-bold text-sky-400 font-sans">{{ l.admin_user }}</td>
+            <td class="py-3 px-4 font-semibold text-slate-200 font-sans">
+              {% if 'Refund' in l.action %}
+                <span class="text-rose-400">{{ l.action }}</span>
+              {% elif 'Fulfillment' in l.action %}
+                <span class="text-amber-400">{{ l.action }}</span>
+              {% elif 'Save' in l.action %}
+                <span class="text-emerald-400">{{ l.action }}</span>
+              {% else %}
+                <span>{{ l.action }}</span>
+              {% endif %}
+            </td>
+            <td class="py-3 px-4 text-slate-300">{{ l.target_type or '—' }} {% if l.target_id %}#{{ l.target_id }}{% endif %}</td>
+            <td class="py-3 px-4 text-slate-300 font-sans max-w-md">{{ l.details or '—' }}</td>
+            <td class="py-3 px-4 text-slate-500 whitespace-nowrap">{{ l.ip_address or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-slate-400 text-xs">
+      No administrative actions recorded yet.
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

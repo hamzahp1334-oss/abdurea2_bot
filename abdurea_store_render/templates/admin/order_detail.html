@@ -1,0 +1,199 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Order {{ order.order_ref }}{% endblock %}
+{% block header_title %}Fulfill Order — {{ order.order_ref }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl">
+
+  <!-- Top Navigation -->
+  <div class="flex items-center justify-between">
+    <a href="/admin/orders" class="text-xs text-sky-600 hover:text-sky-700 font-bold flex items-center gap-1">
+      ← Back to All Orders
+    </a>
+    <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 font-mono font-bold text-xs">
+      Order Ref: {{ order.order_ref }}
+    </span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left 7 Cols: Order Summary & Fulfillment Box -->
+    <div class="lg:col-span-8 space-y-6">
+
+      <!-- Order Details Summary Card -->
+      <div class="admin-card p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+          <div>
+            <h3 class="text-lg font-black text-slate-900">{{ order.snapshot_service_name }}</h3>
+            <div class="text-xs text-slate-500 font-medium mt-0.5">Plan Package: <strong>{{ order.snapshot_plan_duration }}</strong></div>
+          </div>
+          <div class="text-left sm:text-right">
+            <div class="text-2xl font-black text-amber-500">⭐ {{ order.snapshot_price_stars }} XTR</div>
+            <div class="text-[11px] text-emerald-600 font-bold mt-0.5">Payment: {{ order.payment_status }}</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="block text-slate-400 text-[10px] uppercase tracking-wider font-bold mb-1">Customer Name</span>
+            <span class="text-sm font-bold text-slate-900">{{ order.customer_name }}</span>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="block text-slate-400 text-[10px] uppercase tracking-wider font-bold mb-1">Delivery Email</span>
+            <span class="text-sm font-mono text-sky-600 font-bold select-all">{{ order.customer_email }}</span>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="block text-slate-400 text-[10px] uppercase tracking-wider font-bold mb-1">Telegram User ID</span>
+            <span class="text-xs font-mono text-slate-800 font-semibold select-all">
+              {{ order.telegram_id or 'Website Order' }}
+              {% if order.customer_telegram_username %}(@{{ order.customer_telegram_username }}){% endif %}
+            </span>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="block text-slate-400 text-[10px] uppercase tracking-wider font-bold mb-1">Order Placed</span>
+            <span class="text-xs text-slate-700 font-medium">{{ order.created_at }}</span>
+          </div>
+        </div>
+
+        <!-- Verified Payment Pill -->
+        {% if order.payments %}
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 text-emerald-800 font-semibold">
+            <span>✓</span>
+            <span>Verified Telegram Stars Payment: <strong>⭐ {{ order.payments[0].amount }} XTR</strong></span>
+          </div>
+          <span class="font-mono text-[10px] text-emerald-700 select-all">ID: {{ order.payments[0].telegram_payment_charge_id }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Main Action: Fulfillment & Customer Delivery Form -->
+      <div class="admin-card p-6 space-y-4 border-2 border-sky-200 shadow-lg">
+        <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+          <span class="text-xl">🚀</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Deliver Subscription to Customer</h3>
+            <p class="text-xs text-slate-500">Provide the activation credentials or invite link below and send directly to customer's Telegram.</p>
+          </div>
+        </div>
+
+        <form method="POST" action="/admin/orders/{{ order.id }}/update-fulfillment" class="space-y-4 text-xs">
+
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1.5">
+              1. Fulfillment Status *
+            </label>
+            <select name="fulfillment_status" class="admin-input w-full font-bold text-slate-800">
+              <option value="Completed" {% if order.fulfillment_status == 'Completed' %}selected{% endif %}>
+                ✅ Completed (Subscription delivered to customer)
+              </option>
+              <option value="Processing" {% if order.fulfillment_status == 'Processing' %}selected{% endif %}>
+                🔄 Processing (Currently provisioning account)
+              </option>
+              <option value="Not Started" {% if order.fulfillment_status == 'Not Started' %}selected{% endif %}>
+                ⏳ Not Started (Waiting for fulfillment)
+              </option>
+              <option value="Awaiting Customer Information" {% if order.fulfillment_status == 'Awaiting Customer Information' %}selected{% endif %}>
+                ℹ️ Awaiting Customer Information (Need details from buyer)
+              </option>
+              <option value="Cancelled" {% if order.fulfillment_status == 'Cancelled' %}selected{% endif %}>
+                ❌ Cancelled
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1.5">
+              2. Credentials &amp; Delivery Message
+              <span class="text-sky-600 font-normal">(Sent straight to customer in Telegram)</span>
+            </label>
+            <textarea name="customer_delivery_notes" rows="4"
+                      placeholder="Paste activation link, credentials, or instructions here (e.g. 'Here is your Google Family invitation: https://families.google.com/join/...')"
+                      class="admin-input w-full font-mono">{{ order.customer_delivery_notes or '' }}</textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1.5">
+              3. Private Internal Notes
+              <span class="text-slate-400 font-normal">(Visible only to store owner in admin)</span>
+            </label>
+            <textarea name="admin_notes" rows="2"
+                      placeholder="e.g. Supplier account #123, warranty valid until Dec 2026..."
+                      class="admin-input w-full">{{ order.admin_notes or '' }}</textarea>
+          </div>
+
+          <div class="p-3 rounded-xl bg-sky-50 border border-sky-100 flex items-center gap-2.5">
+            <input type="checkbox" id="notify_customer" name="notify_customer" value="1" checked
+                   class="w-4 h-4 rounded text-sky-600 border-slate-300 focus:ring-sky-500">
+            <label for="notify_customer" class="text-xs text-sky-900 font-bold select-none cursor-pointer">
+              Send instant Telegram push notification to customer upon clicking Save
+            </label>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="btn-sexy-blue w-full !py-3 text-sm font-bold shadow-lg">
+              ✓ Save &amp; Deliver to Customer
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Right 5 Cols: Stars Refund & Timeline -->
+    <div class="lg:col-span-4 space-y-6">
+
+      <!-- Telegram Stars Refund Card -->
+      <div class="admin-card p-5 space-y-3 border-rose-100 bg-rose-50/20">
+        <div class="flex items-center gap-2 text-rose-600 font-bold text-xs uppercase tracking-wider">
+          <span>↩️</span>
+          <span>Telegram Stars Refund</span>
+        </div>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Refunds the customer's <strong>⭐ {{ order.snapshot_price_stars }} XTR</strong> back to their Telegram balance automatically.
+        </p>
+
+        {% if order.payment_status == 'Paid' %}
+        <form method="POST" action="/admin/orders/{{ order.id }}/refund" onsubmit="return confirm('Refund ⭐ {{ order.snapshot_price_stars }} XTR to customer {{ order.customer_name }}?');" class="space-y-2.5">
+          <input type="text" name="reason" placeholder="Reason (e.g. out of stock)" required
+                 class="admin-input w-full text-xs">
+          <button type="submit" class="w-full py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm transition-colors">
+            Confirm Stars Refund
+          </button>
+        </form>
+        {% else %}
+        <div class="p-3 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold text-center">
+          Payment is {{ order.payment_status }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Order History Timeline -->
+      <div class="admin-card p-5 space-y-3">
+        <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400">Order Timeline</h4>
+        {% if order.history %}
+        <div class="space-y-3 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+          {% for h in order.history %}
+          <div class="relative pl-6 text-xs">
+            <span class="absolute left-1 top-1.5 w-2 h-2 rounded-full bg-sky-500"></span>
+            <div class="font-bold text-slate-800">{{ h.new_status }}</div>
+            <div class="text-[11px] text-slate-500">{{ h.notes or '' }}</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">{{ h.created_at[:16] }} • {{ h.actor }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-xs text-slate-400">No events recorded.</p>
+        {% endif %}
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

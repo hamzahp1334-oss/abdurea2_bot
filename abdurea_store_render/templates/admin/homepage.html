@@ -1,0 +1,68 @@
+﻿{% extends "admin/layout.html" %}
+
+{% block title %}Homepage Content Management{% endblock %}
+{% block header_title %}Homepage Content Management{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl space-y-6">
+  <div>
+    <h2 class="text-xl font-bold text-slate-100">Homepage & Hero Settings</h2>
+    <p class="text-xs text-slate-400 mt-0.5">Customize storefront headline, announcement bar, and call-to-actions without editing code</p>
+  </div>
+
+  <form method="POST" action="/admin/homepage/save" class="space-y-6 text-xs">
+    <!-- Announcement Bar Settings -->
+    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-200">Top Announcement Bar</h3>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="announcement_enabled" value="1" {% if settings.announcement_enabled == '1' %}checked{% endif %} class="rounded border-slate-700 text-sky-500">
+          <span class="font-semibold text-slate-300">Show Announcement Bar</span>
+        </label>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Announcement Text</label>
+        <input type="text" name="announcement_text" value="{{ settings.announcement_text }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500">
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Announcement Link (Optional)</label>
+        <input type="text" name="announcement_link" value="{{ settings.announcement_link }}" placeholder="/services" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500">
+      </div>
+    </div>
+
+    <!-- Hero Section Content -->
+    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-200">Hero Section Content</h3>
+
+      <div>
+        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Main Headline</label>
+        <input type="text" name="hero_title" value="{{ settings.hero_title }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500 text-sm font-semibold">
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Supporting Subtitle Text</label>
+        <textarea name="hero_subtitle" rows="3" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500">{{ settings.hero_subtitle }}</textarea>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Primary CTA Button Text</label>
+          <input type="text" name="hero_cta_primary" value="{{ settings.hero_cta_primary }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-1">Secondary CTA Button Text</label>
+          <input type="text" name="hero_cta_secondary" value="{{ settings.hero_cta_secondary }}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-sky-500">
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button type="submit" class="btn-telegram-primary px-7 py-3 rounded-xl font-bold text-xs">
+        Save Homepage Settings
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

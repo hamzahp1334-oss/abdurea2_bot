@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Orders — Abdurea Store{% endblock %}
+
+{% block content %}
+<div class="page-title-section">
+  <div>
+    <h1 class="page-heading">Orders</h1>
+    <p class="page-subtitle">Customer orders and payment receipts</p>
+  </div>
+</div>
+
+<!-- 4 Stat Summary Cards (Exact match to Image 2) -->
+<div class="orders-summary-bar">
+  <div class="order-stat-box">
+    <div class="order-stat-label">Total</div>
+    <div class="order-stat-val">{{ stats.total_orders }}</div>
+  </div>
+  <div class="order-stat-box">
+    <div class="order-stat-label">Pending</div>
+    <div class="order-stat-val" style="color: #ea580c;">{{ stats.pending_orders }}</div>
+  </div>
+  <div class="order-stat-box">
+    <div class="order-stat-label">Confirmed</div>
+    <div class="order-stat-val" style="color: #0066ff;">{{ stats.confirmed_orders }}</div>
+  </div>
+  <div class="order-stat-box">
+    <div class="order-stat-label">Completed</div>
+    <div class="order-stat-val" style="color: #10b981;">{{ stats.completed_orders }}</div>
+  </div>
+</div>
+
+<!-- Filter Pills (Exact match to Image 2) -->
+<div class="filter-pills-row">
+  <button class="filter-pill active" onclick="filterByStatus('all', this)">All Orders</button>
+  <button class="filter-pill" onclick="filterByStatus('pending', this)">Pending</button>
+  <button class="filter-pill" onclick="filterByStatus('confirmed', this)">Confirmed</button>
+  <button class="filter-pill" onclick="filterByStatus('completed', this)">Completed</button>
+  <button class="filter-pill" onclick="filterByStatus('cancelled', this)">Cancelled</button>
+</div>
+
+<!-- Order Cards List (Exact match to Image 2) -->
+<div id="ordersContainer">
+  {% for o in orders %}
+  <div class="order-card-v2 order-item-block status-{{ o.status }}" id="order-card-{{ o.id }}">
+    <!-- Card Top Header -->
+    <div class="order-card-header">
+      <div class="order-customer-info">
+        <div class="order-avatar-circle">
+          <i data-feather="user" style="width: 20px; height: 20px;"></i>
+        </div>
+        <div>
+          <div class="order-customer-name">{{ o.buyer_name }}</div>
+          <div class="order-customer-meta">
+            {% if o.buyer_username %}@{{ o.buyer_username }} • {% endif %}{{ o.created_at }}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        {% if o.status == 'pending' %}
+          <span class="status-dot-badge pending">● Pending</span>
+        {% elif o.status in ['confirmed', 'approved'] %}
+          <span class="status-dot-badge confirmed">● Confirmed</span>
+        {% elif o.status == 'completed' %}
+          <span class="status-dot-badge completed">● Completed</span>
+        {% else %}
+          <span class="status-dot-badge cancelled">● Cancelled</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Card Body Split (Left info + Right Charcoal Gray Box) -->
+    <div class="order-card-body">
+      <!-- Left Column: Details -->
+      <div class="order-details-left">
+        <div class="order-details-label">Order Details</div>
+        <div class="order-service-title">{{ o.product_name }}</div>
+        <div class="order-service-sub">{{ o.product_id or '1month shared account' }}</div>
+        <div class="order-price-bold">{{ o.amount|int if o.amount == (o.amount|int) else o.amount }} ETB</div>
+        <div class="order-payment-method">Paid via: {{ o.payment_method|capitalize }}</div>
+
+        <!-- Status Change Dropdown (Matches Screenshot 2) -->
+        <select class="order-status-select" onchange="changeOrderStatus({{ o.id }}, this.value)">
+          <option value="pending" {% if o.status == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="confirmed" {% if o.status in ['confirmed', 'approved'] %}selected{% endif %}>Confirmed</option>
+          <option value="completed" {% if o.status == 'completed' %}selected{% endif %}>Completed</option>
+          <option value="cancelled" {% if o.status in ['cancelled', 'rejected'] %}selected{% endif %}>Cancelled</option>
+        </select>
+      </div>
+
+      <!-- Right Column: Slate/Charcoal Gray Box (Exact match to Screenshot 2) -->
+      <div class="order-transaction-box">
+        <div class="txn-row">
+          <span class="txn-label">Transaction Type:</span>
+          <span class="txn-value">Transfer Money</span>
+        </div>
+        <div class="txn-row">
+          <span class="txn-label">Transaction To:</span>
+          <span class="txn-value">FARHAN</span>
+        </div>
+
+        <div>
+          {% if o.receipt_image %}
+            <button class="btn-view-receipt-white" onclick="openReceiptModal('/receipts/{{ o.receipt_image }}', '{{ o.order_number }}', '{{ o.buyer_name }}', '{{ o.amount }} ETB via {{ o.payment_method|upper }}')">
+              <i data-feather="file-text" style="width: 14px; height: 14px;"></i>
+              <span>View Receipt</span>
+            </button>
+          {% else %}
+            <span style="color: rgba(255,255,255,0.6); font-size: 12px;">No receipt attached</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div style="background: white; border: 1px solid var(--surface-border); border-radius: 16px; padding: 40px; text-align: center; color: var(--text-muted);">
+    No orders placed yet.
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Modal: Receipt Viewer -->
+<div class="drawer-backdrop" id="receiptBackdrop" onclick="closeReceiptModal()"></div>
+<div class="service-modal-overlay" id="receiptOverlay" style="justify-content: center; align-items: center;">
+  <div style="background: white; border-radius: 20px; max-width: 540px; width: 92%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+      <h3 style="font-size: 17px; font-weight: 800;" id="receiptTitle">Payment Receipt</h3>
+      <button style="background:none; border:none; font-size:22px; cursor:pointer;" onclick="closeReceiptModal()">&times;</button>
+    </div>
+    <div style="text-align:center;">
+      <img id="receiptImage" src="" alt="Receipt" style="max-height: 420px; width: 100%; object-fit: contain; border-radius: 12px; background: #f8fafc; border: 1px solid #e4e4e7;">
+    </div>
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+      <button class="btn-upload-box" onclick="closeReceiptModal()">Close</button>
+      <a id="receiptFullLink" href="#" target="_blank" class="btn-add-service-blue">Open Full Size</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function filterByStatus(status, btn) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.order-item-block');
+    cards.forEach(c => {
+      if (status === 'all') {
+        c.style.display = 'block';
+      } else {
+        const isMatch = c.classList.contains(`status-${status}`) || 
+                        (status === 'confirmed' && c.classList.contains('status-approved')) ||
+                        (status === 'cancelled' && c.classList.contains('status-rejected'));
+        c.style.display = isMatch ? 'block' : 'none';
+      }
+    });
+  }
+
+  async function changeOrderStatus(orderId, newStatus) {
+    let credentials = '';
+    let reason = '';
+
+    if (newStatus === 'confirmed') {
+      credentials = prompt("Enter credentials/license key to deliver to the buyer on Telegram (or leave blank for default message):", "");
+      if (credentials === null) return; // User clicked Cancel
+    } else if (newStatus === 'cancelled') {
+      reason = prompt("Enter reason for cancellation/rejection (sent to customer on Telegram):", "Payment receipt could not be verified.");
+      if (reason === null) return;
+    }
+
+    try {
+      const res = await fetch(`/api/orders/${orderId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, credentials: credentials, reason: reason })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        showToast(data.message);
+        setTimeout(() => location.reload(), 600);
+      } else {
+        alert(data.message || 'Error updating order status');
+      }
+    } catch (e) {
+      alert('Network error');
+    }
+  }
+
+  function openReceiptModal(url, orderNo, buyer, meta) {
+    document.getElementById('receiptImage').src = url;
+    document.getElementById('receiptFullLink').href = url;
+    document.getElementById('receiptTitle').innerText = `Receipt for #${orderNo} — ${buyer}`;
+    document.getElementById('receiptOverlay').classList.add('active');
+  }
+
+  function closeReceiptModal() {
+    document.getElementById('receiptOverlay').classList.remove('active');
+  }
+</script>
+{% endblock %}

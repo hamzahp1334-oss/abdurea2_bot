@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}Broadcast Studio & Interactive Buttons — Abdurea Store{% endblock %}
+
+{% block content %}
+<div class="page-title-section">
+  <div>
+    <h1 class="page-heading">Telegram Broadcast Studio</h1>
+    <p class="page-subtitle">Send announcements, special deals, and custom color-coded interactive buttons to your bot subscribers</p>
+  </div>
+</div>
+
+<!-- Quick Campaign Templates -->
+<div style="margin-bottom: 20px;">
+  <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">QUICK CAMPAIGN TEMPLATES (CLICK TO INSERT):</div>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="filter-pill" onclick="applyTemplate('sale')">⚡ Weekend 20% Off Sale</button>
+    <button type="button" class="filter-pill" onclick="applyTemplate('new_service')">🚀 New Service Announcement</button>
+    <button type="button" class="filter-pill" onclick="applyTemplate('premium')">⭐ Telegram Premium Discount</button>
+    <button type="button" class="filter-pill" onclick="applyTemplate('payment')">💳 Payment Accounts Reminder</button>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; margin-bottom: 28px;">
+  <!-- Broadcast Composer with Button Customizer -->
+  <div style="background: white; border: 1px solid var(--border-input); border-radius: var(--radius-card); padding: 26px; box-shadow: var(--shadow-sm);">
+    <h3 style="font-size: 16px; font-weight: 800; display:flex; align-items:center; gap:8px; margin-bottom: 18px; color: #0f172a;">
+      <i data-feather="send" style="width: 17px; height: 17px; color: var(--primary);"></i>
+      <span>Compose Announcement & Add Buttons</span>
+    </h3>
+
+    <form id="broadcastForm" onsubmit="sendBroadcast(event)" style="display:flex; flex-direction:column; gap:18px;">
+      <!-- Target Audience -->
+      <div class="field-group">
+        <label class="field-title">Target Audience</label>
+        <select id="targetType" class="select-clean" onchange="toggleRecipient(this.value)">
+          <option value="all">📢 All Active Bot Subscribers (Broadcast to Everyone)</option>
+          <option value="single">👤 Direct Message to Specific Customer</option>
+        </select>
+      </div>
+
+      <div class="field-group" id="singleUserBox" style="display:none;">
+        <label class="field-title">Select Customer</label>
+        <select id="singleUserSelect" class="select-clean">
+          {% for c in customers %}
+            <option value="{{ c.user_id }}">{{ c.first_name }} {% if c.username %}(@{{ c.username }}){% endif %} — {{ c.phone_number or 'ID: ' ~ c.user_id }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Message Content -->
+      <div class="field-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label class="field-title">Message Body (HTML supported)</label>
+          <span id="charCount" style="font-size: 11.5px; color: var(--text-light);">0 chars</span>
+        </div>
+
+        <!-- Formatting Helper Chips -->
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <button type="button" class="btn-upload-box" style="padding: 3px 8px; font-size: 11px;" onclick="insertTag('b')"><b>Bold</b></button>
+          <button type="button" class="btn-upload-box" style="padding: 3px 8px; font-size: 11px;" onclick="insertTag('i')"><i>Italic</i></button>
+          <button type="button" class="btn-upload-box" style="padding: 3px 8px; font-size: 11px;" onclick="insertTag('code')"><code>Code</code></button>
+          <button type="button" class="btn-upload-box" style="padding: 3px 8px; font-size: 11px;" onclick="insertTag('blockquote')">Quote</button>
+        </div>
+
+        <textarea id="broadcastContent" class="textarea-clean" rows="6" placeholder="Write your broadcast announcement..." required oninput="updatePreview()"></textarea>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- INTERACTIVE BUTTON BUILDER WITH COLORS -->
+      <!-- ============================================ -->
+      <div style="background: #f8fafc; border: 1px solid var(--border-input); border-radius: 14px; padding: 18px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div>
+            <div style="font-weight: 800; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+              <span>🔘 Interactive Button Message</span>
+              <span class="bot-active-tag">CLICKABLE</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted);">Attach a color-coded interactive button under this broadcast</div>
+          </div>
+          <label class="switch-toggle" style="margin: 0;">
+            <input type="checkbox" id="enableButtonToggle" checked onchange="toggleButtonOptions(this.checked)">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+
+        <div id="buttonConfigPanel" style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Button Text -->
+          <div class="field-group">
+            <label class="field-title">Button Label Text</label>
+            <input type="text" id="btnText" class="input-clean" value="🛒 Order Now & Claim Discount" placeholder="e.g. 🛒 Order Canva Pro ─ 250 ETB" oninput="updatePreview()">
+          </div>
+
+          <!-- Button Color Theme Selector -->
+          <div class="field-group">
+            <label class="field-title">Button Color Theme</label>
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+              <label class="color-picker-pill active" id="pill-blue" onclick="selectButtonColor('blue')">
+                <input type="radio" name="btnColorRadio" value="blue" checked style="display: none;">
+                <span>🔵 Blue</span>
+              </label>
+              <label class="color-picker-pill" id="pill-green" onclick="selectButtonColor('green')">
+                <input type="radio" name="btnColorRadio" value="green" style="display: none;">
+                <span>🟢 Green</span>
+              </label>
+              <label class="color-picker-pill" id="pill-gold" onclick="selectButtonColor('gold')">
+                <input type="radio" name="btnColorRadio" value="gold" style="display: none;">
+                <span>🟡 Gold</span>
+              </label>
+              <label class="color-picker-pill" id="pill-purple" onclick="selectButtonColor('purple')">
+                <input type="radio" name="btnColorRadio" value="purple" style="display: none;">
+                <span>🟣 Purple</span>
+              </label>
+              <label class="color-picker-pill" id="pill-red" onclick="selectButtonColor('red')">
+                <input type="radio" name="btnColorRadio" value="red" style="display: none;">
+                <span>🔴 Red</span>
+              </label>
+              <label class="color-picker-pill" id="pill-orange" onclick="selectButtonColor('orange')">
+                <input type="radio" name="btnColorRadio" value="orange" style="display: none;">
+                <span>🟠 Orange</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Button Click Action -->
+          <div class="field-group">
+            <label class="field-title">Button Action / Destination</label>
+            <select id="btnAction" class="select-clean" onchange="handleButtonActionChange(this.value)">
+              <option value="catalog">🛍️ Open Pro Services Catalog (in Bot)</option>
+              <option value="buy">💎 Instant Purchase Checkout (Choose Product)</option>
+              <option value="product">📦 View Specific Service Details (Choose Product)</option>
+              <option value="support">💬 Chat with Admin Support (@trust994)</option>
+              <option value="website">🌐 Open Abdurea Store Website (Base44)</option>
+              <option value="url">🔗 Custom External Link / URL</option>
+            </select>
+          </div>
+
+          <!-- Target Product (shown when action is buy or product) -->
+          <div class="field-group" id="productPickerGroup" style="display: none;">
+            <label class="field-title">Select Store Service</label>
+            <select id="btnProductSelect" class="select-clean" onchange="updatePreview()">
+              {% for p in products %}
+                <option value="{{ p.id }}">{{ p.name }} ({{ p.price|int if p.price == (p.price|int) else p.price }} ETB)</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Custom URL (shown when action is url) -->
+          <div class="field-group" id="customUrlGroup" style="display: none;">
+            <label class="field-title">Destination URL</label>
+            <input type="url" id="btnCustomUrl" class="input-clean" placeholder="https://example.com/promo" oninput="updatePreview()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Actions -->
+      <div style="display:flex; justify-content:space-between; align-items: center; border-top: 1px solid var(--surface-border); padding-top: 14px;">
+        <div style="font-size: 11.5px; color: var(--text-muted);">
+          ⚡ Delivered in real-time via <b>@abdurea1_bot</b>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-upload-box" onclick="clearComposer()">Clear</button>
+          <button type="submit" class="btn-add-service-blue" id="broadcastSendBtn">
+            <i data-feather="send" style="width: 14px; height: 14px;"></i>
+            <span>Send Broadcast</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Live Telegram Chat Preview Mockup -->
+  <div style="background: #f1f5f9; border: 1px solid var(--border-input); border-radius: var(--radius-card); padding: 24px; display:flex; flex-direction:column; gap:14px; box-shadow: var(--shadow-sm);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+        <i data-feather="smartphone" style="width: 16px; height: 16px;"></i>
+        <span>Live Telegram Smartphone Preview</span>
+      </h3>
+      <span class="bot-active-tag">LIVE SYNC</span>
+    </div>
+
+    <!-- Phone Frame -->
+    <div style="background: #e2e8f0; border-radius: 24px; padding: 16px 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.08); flex: 1; display: flex; flex-direction: column;">
+      <!-- Telegram Header -->
+      <div style="background: #2563eb; color: white; border-radius: 14px 14px 0 0; padding: 10px 14px; display: flex; align-items: center; gap: 10px;">
+        <div style="width: 30px; height: 30px; border-radius: 50%; background: #ffffff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
+          A
+        </div>
+        <div>
+          <div style="font-size: 13px; font-weight: 800; line-height: 1.1;">Abdurea Store 🇪🇹</div>
+          <div style="font-size: 10.5px; color: #dbeafe;">bot • online</div>
+        </div>
+      </div>
+
+      <!-- Telegram Message Bubble Area -->
+      <div style="background: #eef2f6; border-radius: 0 0 14px 14px; padding: 16px; flex: 1; min-height: 280px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;">
+        <!-- Text Bubble -->
+        <div style="background: #ffffff; border-radius: 14px 14px 14px 2px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-size: 13px; color: #0f172a; line-height: 1.5; word-break: break-word;">
+          <div id="previewBox">
+Your message preview will appear here in real-time as you type...
+          </div>
+          <div style="text-align: right; font-size: 10px; color: #94a3b8; margin-top: 6px;">
+            Just now ✓✓
+          </div>
+        </div>
+
+        <!-- Telegram Inline Button Mockup -->
+        <div id="previewButtonContainer">
+          <div id="previewButtonEl" class="tg-mockup-button btn-color-blue">
+            <span id="previewButtonText">🔵 🛒 Order Now & Claim Discount</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- History Table -->
+<div style="background: white; border: 1px solid var(--border-input); border-radius: var(--radius-card); padding: 24px; box-shadow: var(--shadow-sm);">
+  <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 16px; color: #0f172a;">Broadcast Delivery History</h3>
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; min-width:600px; text-align:left; font-size: 13px;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--surface-border); color:var(--text-muted); font-weight:700;">
+          <th style="padding:12px 16px;">Message Announcement</th>
+          <th style="padding:12px 16px;">Target</th>
+          <th style="padding:12px 16px;">Delivered To</th>
+          <th style="padding:12px 16px;">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in broadcasts %}
+        <tr style="border-bottom: 1px solid var(--surface-border);">
+          <td style="padding:14px 16px; max-width:380px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight: 600;">
+            {{ b.message }}
+          </td>
+          <td style="padding:14px 16px;">
+            {% if b.target == 'all' %}
+              <span class="badge-tag popular">All Users</span>
+            {% else %}
+              <span class="badge-tag premium">User {{ b.target }}</span>
+            {% endif %}
+          </td>
+          <td style="padding:14px 16px; font-weight:700; color: #16a34a;">
+            {{ b.sent_count }} user(s)
+          </td>
+          <td style="padding:14px 16px; color:var(--text-muted);">{{ b.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" style="padding:32px; text-align:center; color:var(--text-muted);">
+            No broadcasts dispatched yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  /* Color picker pills */
+  .color-picker-pill {
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-input);
+    background: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: var(--transition);
+    user-select: none;
+  }
+  .color-picker-pill:hover {
+    background: #f1f5f9;
+  }
+  .color-picker-pill.active {
+    border-color: #0f172a;
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  /* Telegram Mockup Inline Button */
+  .tg-mockup-button {
+    background: #2563eb;
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: var(--transition);
+    cursor: pointer;
+  }
+  .tg-mockup-button.btn-color-blue { background: #2563eb; }
+  .tg-mockup-button.btn-color-green { background: #16a34a; }
+  .tg-mockup-button.btn-color-gold { background: #ca8a04; }
+  .tg-mockup-button.btn-color-purple { background: #9333ea; }
+  .tg-mockup-button.btn-color-red { background: #dc2626; }
+  .tg-mockup-button.btn-color-orange { background: #ea580c; }
+</style>
+
+<script>
+  let currentColor = 'blue';
+
+  const colorDots = {
+    blue: '🔵',
+    green: '🟢',
+    gold: '🟡',
+    purple: '🟣',
+    red: '🔴',
+    orange: '🟠'
+  };
+
+  const templates = {
+    sale: `⚡ <b>WEEKEND SPECIAL DISCOUNT — 20% OFF!</b> 🔥\n━━━━━━━━━━━━━━━━━━━━\nGet instant access to top verified pro services:\n• 🎨 Canva Pro Team / Private\n• 🤖 Gemini Advanced Pro\n• ⚡ ChatGPT Plus (GPT-4o)\n• ⭐ Telegram Premium\n\nTap the button below to claim your discount now!`,
+    new_service: `🚀 <b>NEW PRO SERVICE JUST LAUNCHED!</b> 🎉\n━━━━━━━━━━━━━━━━━━━━\nWe have expanded our catalog with high-speed digital subscriptions and instant delivery.\n\nAccepted Ethiopian Payments:\n📱 <b>Telebirr:</b> <code>0992558519</code> (FARHAN)\n🏦 <b>CBE Birr:</b> <code>1000572238575</code> (FARHAN)\n\nTap below to view details and order!`,
+    premium: `⭐ <b>TELEGRAM PREMIUM SPECIAL OFFER!</b> 💎\n━━━━━━━━━━━━━━━━━━━━\nUnlock exclusive star reactions, 4GB file uploads, voice-to-text transcriptions, and animated emoji statuses at the best rate in Ethiopia 🇪🇹!\n\nTap below to order instantly!`,
+    payment: `💳 <b>OFFICIAL PAYMENT ACCOUNTS REMINDER:</b>\n━━━━━━━━━━━━━━━━━━━━\nWhen completing your orders, always transfer to:\n📱 <b>Telebirr:</b> <code>0992558519</code> (FARHAN)\n🏦 <b>CBE Birr:</b> <code>1000572238575</code> (FARHAN)\n\n24/7 Support: @trust994`
+  };
+
+  function selectButtonColor(color) {
+    currentColor = color;
+    document.querySelectorAll('.color-picker-pill').forEach(el => el.classList.remove('active'));
+    const selectedPill = document.getElementById('pill-' + color);
+    if (selectedPill) selectedPill.classList.add('active');
+    updatePreview();
+  }
+
+  function toggleButtonOptions(enabled) {
+    document.getElementById('buttonConfigPanel').style.display = enabled ? 'flex' : 'none';
+    document.getElementById('previewButtonContainer').style.display = enabled ? 'block' : 'none';
+  }
+
+  function handleButtonActionChange(action) {
+    document.getElementById('productPickerGroup').style.display = (action === 'buy' || action === 'product') ? 'block' : 'none';
+    document.getElementById('customUrlGroup').style.display = (action === 'url') ? 'block' : 'none';
+    updatePreview();
+  }
+
+  function applyTemplate(key) {
+    if (templates[key]) {
+      document.getElementById('broadcastContent').value = templates[key];
+      if (key === 'sale') {
+        document.getElementById('btnText').value = '🛒 Claim 20% Discount Now';
+        selectButtonColor('red');
+      } else if (key === 'new_service') {
+        document.getElementById('btnText').value = '🛍️ Browse New Services';
+        selectButtonColor('blue');
+      } else if (key === 'premium') {
+        document.getElementById('btnText').value = '⭐ Get Telegram Premium';
+        selectButtonColor('purple');
+      } else if (key === 'payment') {
+        document.getElementById('btnText').value = '💬 Contact Support @trust994';
+        selectButtonColor('green');
+      }
+      updatePreview();
+    }
+  }
+
+  function updatePreview() {
+    const text = document.getElementById('broadcastContent').value;
+    document.getElementById('charCount').innerText = `${text.length} chars`;
+    const preview = document.getElementById('previewBox');
+    if (!text.trim()) {
+      preview.innerHTML = 'Your message preview will appear here in real-time as you type...';
+    } else {
+      preview.innerHTML = text.replace(/\n/g, '<br>');
+    }
+
+    const btnEnabled = document.getElementById('enableButtonToggle').checked;
+    const btnContainer = document.getElementById('previewButtonContainer');
+    if (btnEnabled) {
+      btnContainer.style.display = 'block';
+      const btnText = document.getElementById('btnText').value.trim() || 'Click Here';
+      const dot = colorDots[currentColor] || '🔵';
+      
+      const btnEl = document.getElementById('previewButtonEl');
+      btnEl.className = `tg-mockup-button btn-color-${currentColor}`;
+      document.getElementById('previewButtonText').innerText = `${dot} ${btnText}`;
+    } else {
+      btnContainer.style.display = 'none';
+    }
+  }
+
+  function insertTag(tag) {
+    const area = document.getElementById('broadcastContent');
+    const start = area.selectionStart;
+    const end = area.selectionEnd;
+    const selected = area.value.substring(start, end) || 'text';
+    const replacement = `<${tag}>${selected}</${tag}>`;
+    area.value = area.value.substring(0, start) + replacement + area.value.substring(end);
+    area.focus();
+    updatePreview();
+  }
+
+  function clearComposer() {
+    document.getElementById('broadcastContent').value = '';
+    document.getElementById('btnText').value = '';
+    updatePreview();
+  }
+
+  function toggleRecipient(val) {
+    document.getElementById('singleUserBox').style.display = (val === 'single') ? 'block' : 'none';
+  }
+
+  async function sendBroadcast(e) {
+    e.preventDefault();
+    const btn = document.getElementById('broadcastSendBtn');
+    const content = document.getElementById('broadcastContent').value.trim();
+    const targetType = document.getElementById('targetType').value;
+    const singleUser = document.getElementById('singleUserSelect').value;
+
+    if (!content) {
+      alert('Message cannot be empty');
+      return;
+    }
+
+    const hasButton = document.getElementById('enableButtonToggle').checked;
+    const buttonText = hasButton ? document.getElementById('btnText').value.trim() : '';
+    const buttonAction = hasButton ? document.getElementById('btnAction').value : 'none';
+    const buttonColor = hasButton ? currentColor : 'blue';
+    const productId = hasButton ? document.getElementById('btnProductSelect').value : null;
+    const customUrl = hasButton ? document.getElementById('btnCustomUrl').value.trim() : '';
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>Sending to Telegram...</span>';
+
+    const target = (targetType === 'single') ? singleUser : 'all';
+
+    const payload = {
+      message: content,
+      target: target,
+      button_text: buttonText,
+      button_action: buttonAction,
+      button_color: buttonColor,
+      product_id: productId,
+      button_url: customUrl
+    };
+
+    try {
+      const res = await fetch('/api/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        showToast(data.message || 'Broadcast sent successfully with interactive button!');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        alert(data.message || 'Error sending broadcast');
+        btn.disabled = false;
+        btn.innerHTML = '<i data-feather="send" style="width: 14px; height: 14px;"></i><span>Send Broadcast</span>';
+        feather.replace();
+      }
+    } catch (err) {
+      alert('Network error sending broadcast');
+      btn.disabled = false;
+      btn.innerHTML = '<i data-feather="send" style="width: 14px; height: 14px;"></i><span>Send Broadcast</span>';
+      feather.replace();
+    }
+  }
+
+  // Initialize preview on page load
+  document.addEventListener("DOMContentLoaded", () => {
+    updatePreview();
+  });
+</script>
+{% endblock %}

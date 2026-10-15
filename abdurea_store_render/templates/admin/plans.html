@@ -1,0 +1,235 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Subscription Plans & Pricing{% endblock %}
+{% block header_title %}Subscription Plans & Telegram Stars Pricing{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header and Service Switcher -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Plans & Stars Pricing</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Manage subscription lengths, Telegram Stars (XTR) costs, availability, and highlight badges.</p>
+    </div>
+
+    <!-- Filter by Service dropdown -->
+    <div class="flex items-center gap-2">
+      <label class="text-xs text-slate-600 font-bold">Select Service:</label>
+      <select onchange="window.location.href='/admin/plans?service_id=' + this.value" class="admin-input font-medium py-2 px-3 text-xs">
+        {% for s in all_services %}
+        <option value="{{ s.id }}" {% if current_service and current_service.id == s.id %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  {% if current_service %}
+  <!-- Current Service Banner -->
+  <div class="p-5 admin-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <img src="{{ current_service.image_url or '/static/images/logo.png' }}" class="w-12 h-12 rounded-2xl object-cover p-1.5 bg-sky-50 border border-sky-100 shadow-sm">
+      <div>
+        <h3 class="font-bold text-slate-900 text-base">{{ current_service.name }}</h3>
+        <p class="text-xs text-slate-500 font-medium">Currently configured with <strong>{{ plans|length }}</strong> pricing tier{% if plans|length != 1 %}s{% endif %}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/admin/services" class="btn-secondary-clean text-xs py-2 px-3 flex items-center gap-1">
+        <span>← All Products</span>
+      </a>
+      <button onclick="openPlanEditor()" class="btn-sexy-blue text-xs py-2.5 px-4 shadow-sm">
+        <span>➕</span>
+        <span>Add New Duration</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Plans List Table -->
+  <div class="admin-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-700">
+        <thead class="text-slate-500 uppercase bg-slate-50 border-b border-slate-200 text-[10px] font-bold tracking-wider">
+          <tr>
+            <th class="py-3.5 px-5">Plan Duration</th>
+            <th class="py-3.5 px-5">Telegram Stars (XTR)</th>
+            <th class="py-3.5 px-5">Local Price (ETB)</th>
+            <th class="py-3.5 px-5 text-center">Badge</th>
+            <th class="py-3.5 px-5 text-center">Stock Status</th>
+            <th class="py-3.5 px-5 text-center">Visibility</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          {% for p in plans %}
+          <tr class="hover:bg-sky-50/40 transition-colors">
+            <td class="py-4 px-5 font-bold text-slate-900 text-sm">
+              {{ p.duration }}
+            </td>
+            <td class="py-4 px-5 font-extrabold text-amber-600 text-sm whitespace-nowrap">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800">
+                <span>⭐</span>
+                <span>{{ p.stars_price }}</span>
+                <span class="text-[10px] font-semibold text-amber-600">XTR</span>
+              </span>
+            </td>
+            <td class="py-4 px-5 text-slate-600 font-semibold">
+              {{ p.local_price_etb|int }} ETB
+            </td>
+            <td class="py-4 px-5 text-center">
+              {% if p.is_best_value %}
+              <span class="badge-status badge-ice text-[10px]">⭐ BEST VALUE</span>
+              {% else %}
+              <span class="text-slate-300 font-bold">—</span>
+              {% endif %}
+            </td>
+            <td class="py-4 px-5 text-center">
+              {% if p.availability == 'available' %}
+              <span class="badge-status badge-paid text-[10px]">In Stock</span>
+              {% else %}
+              <span class="badge-status badge-refunded text-[10px]">Unavailable</span>
+              {% endif %}
+            </td>
+            <td class="py-4 px-5 text-center">
+              {% if p.is_active %}
+              <span class="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-bold">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Active
+              </span>
+              {% else %}
+              <span class="inline-flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                Disabled
+              </span>
+              {% endif %}
+            </td>
+            <td class="py-4 px-5 text-right space-x-2 whitespace-nowrap">
+              <button onclick='editPlan({{ p|tojson|safe }})' class="px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs border border-sky-200 transition-colors">
+                Edit
+              </button>
+              <a href="/admin/plans/delete/{{ p.id }}?service_id={{ current_service.id }}" onclick="return confirm('Delete this plan duration?')" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs border border-rose-200 transition-colors">
+                Delete
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="py-12 text-center text-slate-500 text-xs">
+              <div class="max-w-xs mx-auto space-y-2">
+                <p class="font-semibold text-slate-700 text-sm">No plans configured yet</p>
+                <p class="text-slate-400">Click "Add New Duration" above to add prices for {{ current_service.name }}.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="p-12 text-center admin-card text-slate-500 text-sm">
+    <p class="font-bold text-slate-800 text-base mb-1">No services found</p>
+    <p class="text-slate-500 mb-4">Please create at least one product first.</p>
+    <a href="/admin/services" class="btn-sexy-blue text-xs">Go to Products</a>
+  </div>
+  {% endif %}
+
+  <!-- Plan Modal Editor -->
+  <div id="plan-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-sky-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 id="modal-title" class="font-bold text-slate-900 text-base">Add New Duration</h3>
+        <button onclick="closePlanEditor()" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700">✕</button>
+      </div>
+
+      <form method="POST" action="/admin/plans/save" class="space-y-4 text-xs">
+        <input type="hidden" name="service_id" value="{{ current_service.id if current_service else '' }}">
+        <input type="hidden" name="plan_id" id="modal_plan_id" value="">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Duration Title *</label>
+          <input type="text" name="duration" id="modal_duration" required placeholder="e.g. 1 Month, 3 Months, 1 Year"
+                 class="w-full admin-input font-medium">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-amber-700 mb-1">⭐ Stars Price (XTR) *</label>
+            <input type="number" name="stars_price" id="modal_stars_price" required min="1" placeholder="e.g. 250"
+                   class="w-full admin-input font-bold text-amber-700 border-amber-300 focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Reference Price (ETB)</label>
+            <input type="number" name="local_price_etb" id="modal_local_price_etb" min="0" placeholder="e.g. 450"
+                   class="w-full admin-input font-medium">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Stock Availability</label>
+            <select name="availability" id="modal_availability" class="w-full admin-input font-medium">
+              <option value="available">In Stock (Available)</option>
+              <option value="unavailable">Temporarily Out of Stock</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Display Sort Order</label>
+            <input type="number" name="sort_order" id="modal_sort_order" value="0"
+                   class="w-full admin-input font-medium">
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" name="is_best_value" id="modal_is_best_value" value="1" class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500">
+            <span class="text-xs text-slate-700 font-semibold">Highlight with "⭐ BEST VALUE" badge</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" name="is_active" id="modal_is_active" value="1" checked class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500">
+            <span class="text-xs text-slate-700 font-semibold">Active and visible to customers</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closePlanEditor()" class="btn-secondary-clean text-xs py-2 px-4">Cancel</button>
+          <button type="submit" class="btn-sexy-blue text-xs py-2 px-5">Save Duration</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function openPlanEditor() {
+    document.getElementById("modal-title").innerText = "Add New Duration";
+    document.getElementById("modal_plan_id").value = "";
+    document.getElementById("modal_duration").value = "";
+    document.getElementById("modal_stars_price").value = "";
+    document.getElementById("modal_local_price_etb").value = "";
+    document.getElementById("modal_availability").value = "available";
+    document.getElementById("modal_sort_order").value = "0";
+    document.getElementById("modal_is_best_value").checked = false;
+    document.getElementById("modal_is_active").checked = true;
+    document.getElementById("plan-modal").classList.remove("hidden");
+  }
+
+  function editPlan(p) {
+    document.getElementById("modal-title").innerText = "Edit Duration: " + p.duration;
+    document.getElementById("modal_plan_id").value = p.id;
+    document.getElementById("modal_duration").value = p.duration;
+    document.getElementById("modal_stars_price").value = p.stars_price;
+    document.getElementById("modal_local_price_etb").value = p.local_price_etb || "";
+    document.getElementById("modal_availability").value = p.availability || "available";
+    document.getElementById("modal_sort_order").value = p.sort_order || 0;
+    document.getElementById("modal_is_best_value").checked = p.is_best_value == 1;
+    document.getElementById("modal_is_active").checked = p.is_active == 1;
+    document.getElementById("plan-modal").classList.remove("hidden");
+  }
+
+  function closePlanEditor() {
+    document.getElementById("plan-modal").classList.add("hidden");
+  }
+</script>
+{% endblock %}

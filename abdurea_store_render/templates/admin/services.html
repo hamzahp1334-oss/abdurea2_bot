@@ -1,0 +1,253 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Products & Pricing{% endblock %}
+{% block header_title %}Products & Digital Subscriptions{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-lg font-bold text-slate-900">Your Store Products</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Manage digital subscriptions, pricing durations, and availability for the Telegram bot</p>
+    </div>
+    <button onclick="openServiceEditor()" class="btn-sexy-blue text-xs !py-2.5 !px-4">
+      <span>➕</span>
+      <span>Add New Product</span>
+    </button>
+  </div>
+
+  <!-- Products Grid / Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for s in services %}
+    <div class="admin-card p-5 space-y-4 flex flex-col justify-between admin-card-hover">
+
+      <!-- Product Header -->
+      <div>
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="flex items-center gap-3">
+            <img src="{{ s.image_url or '/static/images/logo.png' }}" alt="{{ s.name }}"
+                 class="w-12 h-12 rounded-2xl object-cover p-1.5 bg-sky-50 border border-sky-100 flex-shrink-0">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm leading-snug">{{ s.name }}</h3>
+              <span class="text-[11px] text-slate-500 font-medium">{{ s.category_name or 'Digital Service' }}</span>
+            </div>
+          </div>
+
+          <!-- Availability Badge -->
+          {% if s.availability == 'available' %}
+            <span class="badge-status badge-paid whitespace-nowrap">✓ Available</span>
+          {% elif s.availability == 'limited' %}
+            <span class="badge-status badge-processing whitespace-nowrap">Limited</span>
+          {% else %}
+            <span class="badge-status badge-refunded whitespace-nowrap">Unavailable</span>
+          {% endif %}
+        </div>
+
+        <!-- Description -->
+        <p class="text-xs text-slate-600 line-clamp-2 mb-3 leading-relaxed">
+          {{ s.short_description or s.description or 'No description provided' }}
+        </p>
+
+        <!-- Price Range -->
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+          <span class="text-slate-500 font-medium">Price in Stars:</span>
+          <span class="font-black text-amber-500 text-sm">
+            {% if s.min_stars_price %}
+              From ⭐ {{ s.min_stars_price }} XTR
+            {% else %}
+              <span class="text-slate-400 font-normal text-xs">No active plans</span>
+            {% endif %}
+          </span>
+        </div>
+
+        <!-- Badges -->
+        <div class="flex flex-wrap gap-1.5 mt-3">
+          {% if s.is_popular %}
+          <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">🔥 POPULAR</span>
+          {% endif %}
+          {% if s.is_recommended %}
+          <span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-bold">⭐ RECOMMENDED</span>
+          {% endif %}
+          {% if s.is_premium %}
+          <span class="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">💎 PREMIUM</span>
+          {% endif %}
+          {% if s.is_featured %}
+          <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">FEATURED</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+        <a href="/admin/plans?service_id={{ s.id }}" class="btn-sexy-blue !py-1.5 !px-3 text-xs flex-1 text-center">
+          💳 Plans ({{ s.plan_count }})
+        </a>
+        <button onclick='editService({{ s|tojson|safe }})' class="btn-secondary-clean !py-1.5 !px-3 text-xs">
+          Edit
+        </button>
+        <a href="/admin/services/duplicate/{{ s.id }}" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700" title="Copy Product">
+          📋
+        </a>
+        <a href="/admin/services/archive/{{ s.id }}" onclick="return confirm('Archive {{ s.name }}? It will be hidden from the bot without deleting order history.');" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600" title="Archive">
+          🗑
+        </a>
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- Simple Add / Edit Product Modal -->
+<div id="service-editor-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <div class="relative z-10 w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+      <h3 id="modal-title" class="text-base font-bold text-slate-900">Add New Product</h3>
+      <button onclick="closeServiceEditor()" class="text-slate-400 hover:text-slate-700 text-lg">✕</button>
+    </div>
+
+    <form method="POST" action="/admin/services/save" enctype="multipart/form-data" class="mt-4 space-y-4 text-xs">
+      <input type="hidden" name="service_id" id="form-service-id">
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Product Name *</label>
+          <input type="text" name="name" id="form-name" required placeholder="e.g. Google Gemini Pro"
+                 class="admin-input w-full font-bold">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Category *</label>
+          <select name="category_id" id="form-category-id" class="admin-input w-full">
+            {% for c in categories %}
+            <option value="{{ c.id }}">{{ c.icon }} {{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">URL Identifier (Slug) *</label>
+        <input type="text" name="slug" id="form-slug" required placeholder="e.g. gemini-pro"
+               class="admin-input w-full font-mono text-xs">
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Short Description</label>
+        <input type="text" name="short_description" id="form-short-desc" placeholder="One clear sentence explaining the service"
+               class="admin-input w-full">
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Full Description</label>
+        <textarea name="description" id="form-description" rows="3" placeholder="Full service details..."
+                  class="admin-input w-full"></textarea>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Included Benefits / Features (one per line)</label>
+        <textarea name="features" id="form-features" rows="3" placeholder="2 Million context window&#10;Multimodal AI reasoning&#10;Full warranty"
+                  class="admin-input w-full font-mono"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Activation Requirements</label>
+          <input type="text" name="requirements" id="form-requirements" placeholder="e.g. Personal Gmail address"
+                 class="admin-input w-full">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Availability</label>
+          <select name="availability" id="form-availability" class="admin-input w-full font-bold">
+            <option value="available">🟢 Available for Purchase</option>
+            <option value="limited">🟡 Limited Availability</option>
+            <option value="unavailable">🔴 Currently Unavailable</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Product Badge Options</label>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+            <input type="checkbox" name="is_popular" id="form-popular" value="1" class="rounded text-sky-600">
+            <span class="font-bold text-[11px] text-slate-700">Popular</span>
+          </label>
+          <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+            <input type="checkbox" name="is_recommended" id="form-recommended" value="1" class="rounded text-sky-600">
+            <span class="font-bold text-[11px] text-slate-700">Recommended</span>
+          </label>
+          <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+            <input type="checkbox" name="is_premium" id="form-premium" value="1" class="rounded text-sky-600">
+            <span class="font-bold text-[11px] text-slate-700">Premium</span>
+          </label>
+          <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+            <input type="checkbox" name="is_featured" id="form-featured" value="1" class="rounded text-sky-600">
+            <span class="font-bold text-[11px] text-slate-700">Featured</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Upload Product Image (1:1 Square recommended)</label>
+        <input type="file" name="image_file" accept="image/*"
+               class="w-full text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+        <input type="text" name="image_url" id="form-image-url" placeholder="/static/images/..."
+               class="admin-input w-full mt-1.5 font-mono text-[11px]">
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+        <button type="button" onclick="closeServiceEditor()" class="btn-secondary-clean !py-2 !px-4">Cancel</button>
+        <button type="submit" class="btn-sexy-blue !py-2 !px-5 shadow-md">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openServiceEditor() {
+    document.getElementById("modal-title").innerText = "Add New Product";
+    document.getElementById("form-service-id").value = "";
+    document.getElementById("form-name").value = "";
+    document.getElementById("form-slug").value = "";
+    document.getElementById("form-short-desc").value = "";
+    document.getElementById("form-description").value = "";
+    document.getElementById("form-features").value = "";
+    document.getElementById("form-requirements").value = "";
+    document.getElementById("form-availability").value = "available";
+    document.getElementById("form-popular").checked = false;
+    document.getElementById("form-recommended").checked = false;
+    document.getElementById("form-premium").checked = false;
+    document.getElementById("form-featured").checked = false;
+    document.getElementById("form-image-url").value = "";
+    document.getElementById("service-editor-modal").classList.remove("hidden");
+  }
+
+  function editService(s) {
+    document.getElementById("modal-title").innerText = "Edit Product: " + s.name;
+    document.getElementById("form-service-id").value = s.id;
+    document.getElementById("form-name").value = s.name;
+    document.getElementById("form-slug").value = s.slug;
+    document.getElementById("form-category-id").value = s.category_id || "";
+    document.getElementById("form-short-desc").value = s.short_description || "";
+    document.getElementById("form-description").value = s.description || "";
+    document.getElementById("form-features").value = (s.features_list || []).join("\n");
+    document.getElementById("form-requirements").value = s.requirements || "";
+    document.getElementById("form-availability").value = s.availability || "available";
+    document.getElementById("form-popular").checked = s.is_popular == 1;
+    document.getElementById("form-recommended").checked = s.is_recommended == 1;
+    document.getElementById("form-premium").checked = s.is_premium == 1;
+    document.getElementById("form-featured").checked = s.is_featured == 1;
+    document.getElementById("form-image-url").value = s.image_url || "";
+    document.getElementById("service-editor-modal").classList.remove("hidden");
+  }
+
+  function closeServiceEditor() {
+    document.getElementById("service-editor-modal").classList.add("hidden");
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,358 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ settings.store_name }} — {{ settings.store_tagline }}{% endblock %}
+
+{% block content %}
+<!-- Hero Glow Effect Background -->
+<div class="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
+  <div class="hero-glow"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+    <!-- Brand Pill -->
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold mb-6 shadow-sm">
+      <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+      <span>OFFICIAL DIGITAL STOREFRONT</span>
+      <span class="text-slate-500">•</span>
+      <span class="text-slate-300 font-normal">Fast Telegram Delivery</span>
+    </div>
+
+    <!-- Main Headline -->
+    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-100 max-w-4xl mx-auto leading-tight">
+      {{ settings.hero_title }}
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="mt-5 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+      {{ settings.hero_subtitle }}
+    </p>
+
+    <!-- CTAs -->
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto">
+      <a href="#services-section" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm shadow-lg shadow-sky-600/30 transition-all transform hover:-translate-y-0.5 text-center">
+        {{ settings.hero_cta_primary }}
+      </a>
+      <a href="{{ settings.telegram_order_link }}" target="_blank" class="w-full sm:w-auto btn-telegram-primary px-7 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+        {{ settings.hero_cta_secondary }}
+      </a>
+    </div>
+
+    <!-- Quick Highlights -->
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-300 font-medium">
+      <div class="flex items-center gap-2">
+        <span class="text-sky-400 font-bold">⚡</span> Fast Response & Delivery
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-emerald-400 font-bold">🇪🇹</span> Telebirr & CBE Accepted
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-purple-400 font-bold">🛡️</span> Full Period Warranty
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-amber-400 font-bold">💬</span> Telegram: {{ settings.telegram_username }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Category & Search Section -->
+<section id="services-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8">
+  <div class="border-t border-slate-800/80 pt-10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100">
+          What are you looking for?
+        </h2>
+        <p class="text-sm text-slate-300 mt-1">
+          Browse by category or search through our available subscriptions
+        </p>
+      </div>
+
+      <!-- Real-time Search Box -->
+      <div class="w-full md:w-80">
+        <div class="relative">
+          <input type="text" id="service-search-input" placeholder="Search services (Gemini, Netflix...)" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 pl-10 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="flex items-center gap-2.5 overflow-x-auto pb-4 scrollbar-none">
+      <button class="category-pill active px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-category="all">
+        ✨ All Services
+      </button>
+      {% for cat in categories %}
+      <button class="category-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-category="{{ cat.id }}">
+        {{ cat.icon }} {{ cat.name }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Services Grid -->
+  <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="services-grid">
+    {% for service in services %}
+    <div class="service-card service-card-item p-5" data-category="{{ service.category_id }}" data-name="{{ service.name }}" data-desc="{{ service.short_description }}">
+      <!-- Card Header -->
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <img src="{{ service.image_url or '/static/images/logo.svg' }}" alt="{{ service.name }}" class="w-12 h-12 rounded-xl object-cover p-1 bg-slate-800/60 border border-slate-700/50">
+          <div>
+            <h3 class="font-bold text-base text-slate-100">{{ service.name }}</h3>
+            <span class="text-xs text-slate-300">{{ service.category_name }}</span>
+          </div>
+        </div>
+        
+        <!-- Badges -->
+        <div>
+          {% if service.is_popular %}
+          <span class="badge-popular text-[10px] font-bold px-2 py-0.5 rounded-full">🔥 POPULAR</span>
+          {% elif service.is_recommended %}
+          <span class="badge-recommended text-[10px] font-bold px-2 py-0.5 rounded-full">⭐ RECOMMENDED</span>
+          {% elif service.is_premium %}
+          <span class="badge-premium text-[10px] font-bold px-2 py-0.5 rounded-full">💎 PREMIUM</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Description -->
+      <p class="mt-3 text-xs text-slate-300 line-clamp-2 leading-relaxed flex-1">
+        {{ service.short_description }}
+      </p>
+
+      <!-- Plans and Price Summary -->
+      <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-baseline justify-between">
+        <div>
+          <span class="text-[11px] text-slate-400 block">Starting from</span>
+          <span class="text-lg font-extrabold text-sky-400">
+            {% if service.min_price %}
+              {{ service.min_price|int }} <span class="text-xs font-normal text-slate-400">ETB</span>
+            {% else %}
+              Ask on TG
+            {% endif %}
+          </span>
+        </div>
+
+        <!-- Availability -->
+        <div class="text-right">
+          {% if service.availability == 'available' %}
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+            <span class="status-dot-available"></span> Available
+          </span>
+          {% elif service.availability == 'limited' %}
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+            <span class="status-dot-limited"></span> Limited
+          </span>
+          {% else %}
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400">
+            <span class="status-dot-unavailable"></span> Unavailable
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-4 grid grid-cols-2 gap-2">
+        <button onclick="openServiceModal({{ service.id }})" class="btn-secondary-glow py-2 rounded-xl text-xs font-semibold text-center">
+          VIEW DETAILS
+        </button>
+        {% if service.availability != 'unavailable' %}
+        <button onclick="openServiceModal({{ service.id }})" class="btn-telegram-primary py-2 rounded-xl text-xs font-bold text-center">
+          ORDER NOW
+        </button>
+        {% else %}
+        <button disabled class="py-2 rounded-xl text-xs font-bold text-slate-500 bg-slate-800 cursor-not-allowed text-center">
+          UNAVAILABLE
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Empty State -->
+  <div id="no-services-state" class="hidden text-center py-16">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-800 flex items-center justify-center text-3xl">
+      🔍
+    </div>
+    <h3 class="text-lg font-bold text-slate-200">No services found</h3>
+    <p class="text-sm text-slate-400 mt-1 max-w-sm mx-auto">
+      Try searching with another keyword or pick a different category above.
+    </p>
+  </div>
+</section>
+
+<!-- Recently Viewed Section (Lightweight Client Cache) -->
+<section id="recently-viewed-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="border-t border-slate-800/80 pt-8">
+    <h3 class="text-base font-bold text-slate-200 mb-4 flex items-center gap-2">
+      <span>🕒 Recently Viewed</span>
+    </h3>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="recently-viewed-list">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Simple 3-Step Ordering Process -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="rounded-3xl bg-slate-900/60 border border-slate-800 p-8 sm:p-12 relative overflow-hidden">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100">
+        Simple 3-Step Ordering
+      </h2>
+      <p class="text-sm text-slate-400 mt-2">
+        No complicated accounts, no long forms. Instant direct checkout via Telegram.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+      <!-- Step 1 -->
+      <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/50 relative">
+        <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 font-extrabold text-sm flex items-center justify-center mb-4">
+          01
+        </div>
+        <h3 class="text-base font-bold text-slate-100">Choose Your Service</h3>
+        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+          Browse through our curated collection of verified AI tools, entertainment, music, and design software.
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/50 relative">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 font-extrabold text-sm flex items-center justify-center mb-4">
+          02
+        </div>
+        <h3 class="text-base font-bold text-slate-100">Select Your Plan</h3>
+        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+          Pick your desired subscription length (1 Month, 3 Months, 6 Months, or 1 Year) with transparent ETB pricing.
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/50 relative">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 font-extrabold text-sm flex items-center justify-center mb-4">
+          03
+        </div>
+        <h3 class="text-base font-bold text-slate-100">Order on Telegram</h3>
+        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+          Click order to message us directly on Telegram (@trust994), pay via Telebirr or CBE, and receive your credentials.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ethiopian Payment Methods Highlight -->
+<section id="payment-info" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-8">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold mb-3">
+        <span>🇪🇹 LOCAL PAYMENT READY</span>
+      </div>
+      <h2 class="text-2xl font-bold text-slate-100">Pay Easily via Telebirr, CBEBirr & CBE Bank</h2>
+      <p class="text-sm text-slate-400 mt-2 max-w-xl leading-relaxed">
+        We accept direct Ethiopian transfers with instant transaction verification. All accounts under name <strong class="text-slate-200">FERHAN</strong>.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <button onclick="openPaymentModal()" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-600/20">
+        View Payment Numbers
+      </button>
+      <a href="{{ settings.telegram_order_link }}" target="_blank" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all">
+        Message @trust994
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Why ABDUREA STORE Section -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="text-center max-w-2xl mx-auto mb-12">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100">
+      Why ABDUREA STORE
+    </h2>
+    <p class="text-sm text-slate-400 mt-2">
+      Dependable digital subscriptions backed by responsive customer support.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 text-center">
+      <div class="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-xl mx-auto mb-3">
+        ⚡
+      </div>
+      <h3 class="font-bold text-sm text-slate-100">Fast Response</h3>
+      <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+        Quick fulfillment and prompt replies directly through our official Telegram.
+      </p>
+    </div>
+
+    <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 text-center">
+      <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl mx-auto mb-3">
+        💻
+      </div>
+      <h3 class="font-bold text-sm text-slate-100">Genuine Subscriptions</h3>
+      <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+        Official features, full HD/4K, uninterrupted streaming, and AI capabilities.
+      </p>
+    </div>
+
+    <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 text-center">
+      <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl mx-auto mb-3">
+        📱
+      </div>
+      <h3 class="font-bold text-sm text-slate-100">Zero Account Hassle</h3>
+      <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+        No account registration needed on our site. Select plan and order immediately.
+      </p>
+    </div>
+
+    <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 text-center">
+      <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl mx-auto mb-3">
+        🛡️
+      </div>
+      <h3 class="font-bold text-sm text-slate-100">Duration Warranty</h3>
+      <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+        Full warranty and technical support throughout your subscription period.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section id="faq" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="text-center mb-10">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100">
+      Frequently Asked Questions
+    </h2>
+    <p class="text-sm text-slate-400 mt-2">
+      Everything you need to know about ordering, payment, and delivery.
+    </p>
+  </div>
+
+  <div class="space-y-3">
+    {% for faq in faqs %}
+    <div class="faq-item rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden transition-all">
+      <div class="faq-header p-5 flex items-center justify-between text-slate-200 font-semibold text-sm">
+        <span>{{ faq.question }}</span>
+        <svg class="faq-chevron w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+      <div class="faq-content px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed">
+        {{ faq.answer }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Still have questions -->
+  <div class="mt-8 text-center">
+    <p class="text-xs text-slate-400">Still have a question?</p>
+    <a href="{{ settings.telegram_order_link }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 hover:text-sky-300 mt-1">
+      <span>Chat with us on Telegram (@trust994) →</span>
+    </a>
+  </div>
+</section>
+{% endblock %}

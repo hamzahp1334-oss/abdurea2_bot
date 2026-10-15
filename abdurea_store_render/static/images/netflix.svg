@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="24" fill="#0f172a" />
+  <!-- Netflix N -->
+  <path d="M28 20 H40 V80 H28 Z" fill="#E50914" />
+  <path d="M60 20 H72 V80 H60 Z" fill="#E50914" />
+  <path d="M28 20 L62 80 H72 L38 20 Z" fill="#B20710" />
+</svg>

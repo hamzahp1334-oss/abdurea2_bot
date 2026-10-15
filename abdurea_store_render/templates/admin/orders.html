@@ -1,0 +1,153 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Orders & Delivery{% endblock %}
+{% block header_title %}Orders & Delivery Management{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Simple Quick-Filter Tabs -->
+  <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+    <a href="/admin/orders" class="px-4 py-2 rounded-xl transition-all {% if not fulfillment_status and not payment_status %}bg-sky-600 text-white shadow-md{% else %}bg-white text-slate-600 hover:bg-slate-50 border border-slate-200{% endif %}">
+      All Orders
+    </a>
+    <a href="/admin/orders?fulfillment_status=Not+Started" class="px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 {% if fulfillment_status == 'Not Started' %}bg-amber-500 text-white shadow-md{% else %}bg-white text-amber-700 hover:bg-amber-50 border border-amber-200{% endif %}">
+      <span>⏳ Needs Delivery</span>
+    </a>
+    <a href="/admin/orders?fulfillment_status=Processing" class="px-4 py-2 rounded-xl transition-all {% if fulfillment_status == 'Processing' %}bg-sky-600 text-white shadow-md{% else %}bg-white text-slate-600 hover:bg-slate-50 border border-slate-200{% endif %}">
+      <span>🔄 Processing</span>
+    </a>
+    <a href="/admin/orders?fulfillment_status=Completed" class="px-4 py-2 rounded-xl transition-all {% if fulfillment_status == 'Completed' %}bg-emerald-600 text-white shadow-md{% else %}bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200{% endif %}">
+      <span>✅ Delivered</span>
+    </a>
+    <a href="/admin/orders?payment_status=Refunded" class="px-4 py-2 rounded-xl transition-all {% if payment_status == 'Refunded' %}bg-rose-600 text-white shadow-md{% else %}bg-white text-rose-700 hover:bg-rose-50 border border-rose-200{% endif %}">
+      <span>↩️ Refunded</span>
+    </a>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="admin-card p-4">
+    <form method="GET" action="/admin/orders" class="flex flex-col sm:flex-row items-center gap-3">
+      <div class="flex-1 w-full">
+        <input type="text" name="q" value="{{ q or '' }}" placeholder="Search by Order Ref, Customer Name, Email, or Telegram ID..."
+               class="admin-input w-full">
+      </div>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button type="submit" class="btn-sexy-blue text-xs !py-2.5 !px-5 whitespace-nowrap">
+          <span>🔎</span>
+          <span>Search Orders</span>
+        </button>
+        {% if q or fulfillment_status or payment_status %}
+        <a href="/admin/orders" class="btn-secondary-clean text-xs !py-2.5 !px-4 whitespace-nowrap">
+          Clear Filters
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="admin-card overflow-hidden">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+        Showing {{ orders|length }} Customer Orders
+      </span>
+      <span class="text-xs text-slate-400">Click Manage to deliver credentials or update status</span>
+    </div>
+
+    {% if orders %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-700">
+        <thead>
+          <tr class="border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider bg-slate-50/80">
+            <th class="py-3.5 px-4">Order Ref</th>
+            <th class="py-3.5 px-4">Customer</th>
+            <th class="py-3.5 px-4">Subscription Plan</th>
+            <th class="py-3.5 px-4">Price</th>
+            <th class="py-3.5 px-4">Payment</th>
+            <th class="py-3.5 px-4">Delivery Status</th>
+            <th class="py-3.5 px-4">Date</th>
+            <th class="py-3.5 px-4 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for o in orders %}
+          <tr class="hover:bg-sky-50/40 transition-colors">
+            <!-- Ref -->
+            <td class="py-4 px-4 font-mono font-bold text-sky-600 whitespace-nowrap">
+              <a href="/admin/orders/{{ o.id }}" class="hover:underline">{{ o.order_ref }}</a>
+            </td>
+
+            <!-- Customer -->
+            <td class="py-4 px-4">
+              <div class="font-bold text-slate-900">{{ o.customer_name }}</div>
+              <div class="text-[11px] text-slate-500 font-mono select-all">{{ o.customer_email }}</div>
+              {% if o.telegram_id %}
+              <div class="text-[10px] text-sky-600 mt-0.5">
+                TG ID: {{ o.telegram_id }} {% if o.customer_telegram_username %}(@{{ o.customer_telegram_username }}){% endif %}
+              </div>
+              {% endif %}
+            </td>
+
+            <!-- Service & Plan -->
+            <td class="py-4 px-4">
+              <div class="font-bold text-slate-900">{{ o.snapshot_service_name }}</div>
+              <div class="text-[11px] text-slate-500 font-medium">{{ o.snapshot_plan_duration }}</div>
+            </td>
+
+            <!-- Stars Price -->
+            <td class="py-4 px-4 font-black text-amber-500 whitespace-nowrap">
+              ⭐ {{ o.snapshot_price_stars }} XTR
+            </td>
+
+            <!-- Payment Status -->
+            <td class="py-4 px-4 whitespace-nowrap">
+              {% if o.payment_status == 'Paid' %}
+                <span class="badge-status badge-paid">✓ Paid</span>
+              {% elif o.payment_status == 'Refunded' %}
+                <span class="badge-status badge-refunded">↩ Refunded</span>
+              {% else %}
+                <span class="badge-status badge-unpaid">⏳ {{ o.payment_status }}</span>
+              {% endif %}
+            </td>
+
+            <!-- Fulfillment Status -->
+            <td class="py-4 px-4 whitespace-nowrap">
+              {% if o.fulfillment_status == 'Completed' %}
+                <span class="badge-status badge-completed">✓ Delivered</span>
+              {% elif o.fulfillment_status == 'Processing' %}
+                <span class="badge-status badge-processing">🔄 Processing</span>
+              {% elif o.fulfillment_status == 'Cancelled' %}
+                <span class="badge-status badge-refunded">✕ Cancelled</span>
+              {% else %}
+                <span class="badge-status badge-processing bg-amber-50 text-amber-800 border-amber-200">
+                  ⏳ Needs Delivery
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Created Date -->
+            <td class="py-4 px-4 text-slate-400 text-[11px] whitespace-nowrap">
+              {{ o.created_at[:16] }}
+            </td>
+
+            <!-- Action -->
+            <td class="py-4 px-4 text-right whitespace-nowrap">
+              <a href="/admin/orders/{{ o.id }}" class="btn-sexy-blue text-xs !py-1.5 !px-3.5">
+                Manage →
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-16 text-slate-400 text-xs">
+      No orders found matching your selection.
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

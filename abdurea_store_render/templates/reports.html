@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Market Reports & Analytics — Abdurea Store{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Market Reports & Analytics</h1>
+    <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Comprehensive sales reports and market breakdown for digital pro services.</p>
+  </div>
+
+  <div class="page-controls">
+    <button class="btn-primary" onclick="window.print()">
+      <i data-feather="printer" style="width: 14px; height: 14px;"></i>
+      <span>Print / PDF Report</span>
+    </button>
+  </div>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Gross Volume</span>
+      <span style="font-size: 16px;">📈</span>
+    </div>
+    <div class="metric-value">{{ stats.total_revenue }} ETB</div>
+    <div class="metric-sub">Lifetime completed sales</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Approval Rate</span>
+      <span style="font-size: 16px;">🎯</span>
+    </div>
+    <div class="metric-value">
+      {% if stats.total_orders > 0 %}
+        {{ ((stats.approved_orders / stats.total_orders) * 100)|round(1) }}%
+      {% else %}
+        100%
+      {% endif %}
+    </div>
+    <div class="metric-sub">Receipt verification success</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Average Order Value</span>
+      <span style="font-size: 16px;">💎</span>
+    </div>
+    <div class="metric-value">
+      {% if stats.approved_orders > 0 %}
+        {{ (stats.total_revenue / stats.approved_orders)|round(0) }} ETB
+      {% else %}
+        320 ETB
+      {% endif %}
+    </div>
+    <div class="metric-sub">Per completed transaction</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Catalog Health</span>
+      <span style="font-size: 16px;">⚡</span>
+    </div>
+    <div class="metric-value">{{ stats.active_products }} Active</div>
+    <div class="metric-sub">Ready for instant delivery</div>
+  </div>
+</div>
+
+<!-- Charts for reports -->
+<div class="split-grid">
+  <div class="chart-card">
+    <div class="card-title">Payment Method Share (Telebirr vs CBE)</div>
+    <div style="height: 240px; display:flex; align-items:center; justify-content:center;">
+      <canvas id="paymentMethodChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="card-title">Order Fulfillment Status</div>
+    <div style="height: 240px; display:flex; align-items:center; justify-content:center;">
+      <canvas id="orderFulfillmentChart"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Payment methods chart
+  new Chart(document.getElementById('paymentMethodChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Telebirr (0992558519)', 'CBE Birr (1000572238575)'],
+      datasets: [{
+        data: [65, 35],
+        backgroundColor: ['#0072bc', '#6f2c91'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // Order fulfillment
+  new Chart(document.getElementById('orderFulfillmentChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Approved', 'Pending', 'Rejected'],
+      datasets: [{
+        data: [{{ stats.approved_orders }}, {{ stats.pending_orders }}, 1],
+        backgroundColor: ['#16a34a', '#d97706', '#dc2626'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+</script>
+{% endblock %}

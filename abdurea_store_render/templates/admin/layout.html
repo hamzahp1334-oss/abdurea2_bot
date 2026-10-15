@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dashboard{% endblock %} — Admin | {{ settings.store_name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body {
+      background: linear-gradient(180deg, #edf6ff 0%, #f4f8fd 40%, #f8fafc 100%);
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body class="admin-body min-h-screen flex antialiased font-sans">
+
+  <!-- Admin Sidebar -->
+  <aside class="w-64 admin-sidebar flex-shrink-0 flex flex-col justify-between hidden lg:flex min-h-screen sticky top-0 h-screen overflow-y-auto">
+    <div class="p-5">
+      <!-- Brand Logo -->
+      <a href="/admin" class="flex items-center gap-2 mb-6 px-1">
+        <img src="{{ settings.store_logo_url or '/static/images/logo.png' }}" alt="{{ settings.store_name }}" class="h-9 max-w-[180px] object-contain">
+      </a>
+
+      <!-- Telegram Bot Live Pill -->
+      <div class="mb-5 p-2.5 rounded-xl bg-sky-50 border border-sky-100 flex items-center gap-2.5 text-xs text-sky-800">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div class="truncate">
+          <div class="font-bold text-[11px] text-sky-950">Bot Active</div>
+          <div class="text-[10px] text-sky-600 truncate font-mono">{{ settings.bot_username or '@abdurea1_bot' }}</div>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="space-y-1 text-sm font-medium">
+        <a href="/admin" class="admin-nav-item flex items-center gap-3 px-3.5 py-2.5 {% if active_page == 'dashboard' %}active{% endif %}">
+          <span class="text-base">📊</span>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="/admin/orders" class="admin-nav-item flex items-center justify-between px-3.5 py-2.5 {% if active_page == 'orders' %}active{% endif %}">
+          <div class="flex items-center gap-3">
+            <span class="text-base">📦</span>
+            <span>Orders & Delivery</span>
+          </div>
+          {% if pending_count and pending_count > 0 %}
+          <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+            {{ pending_count }}
+          </span>
+          {% endif %}
+        </a>
+
+        <a href="/admin/services" class="admin-nav-item flex items-center gap-3 px-3.5 py-2.5 {% if active_page == 'services' or active_page == 'plans' %}active{% endif %}">
+          <span class="text-base">🛍</span>
+          <span>Products & Pricing</span>
+        </a>
+
+        <a href="/admin/categories" class="admin-nav-item flex items-center gap-3 px-3.5 py-2.5 {% if active_page == 'categories' %}active{% endif %}">
+          <span class="text-base">📂</span>
+          <span>Categories</span>
+        </a>
+
+        <a href="/admin/promotions" class="admin-nav-item flex items-center gap-3 px-3.5 py-2.5 {% if active_page == 'promotions' %}active{% endif %}">
+          <span class="text-base">🎁</span>
+          <span>Promotions & Deals</span>
+        </a>
+
+        <a href="/admin/reviews" class="admin-nav-item flex items-center gap-3 px-3.5 py-2.5 {% if active_page == 'reviews' %}active{% endif %}">
+          <span class="text-base">⭐</span>
+          <span>Customer Reviews</span>
+        </a>
+
+        <a href="/admin/customers" class="admin-nav-item flex items-center gap-3 px-3.5 py-2.5 {% if active_page == 'customers' %}active{% endif %}">
+          <span class="text-base">👥</span>
+          <span>Customers</span>
+        </a>
+
+        <div class="pt-3 pb-1">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-3">Configuration</div>
+        </div>
+
+        <a href="/admin/contacts" class="admin-nav-item flex items-center gap-3 px-3.5 py-2 {% if active_page == 'contacts' %}active{% endif %}">
+          <span class="text-base">💬</span>
+          <span>Support & Contacts</span>
+        </a>
+
+        <a href="/admin/bot-content" class="admin-nav-item flex items-center gap-3 px-3.5 py-2 {% if active_page == 'bot_content' %}active{% endif %}">
+          <span class="text-base">🤖</span>
+          <span>Bot Messages & Terms</span>
+        </a>
+
+        <a href="/admin/faq" class="admin-nav-item flex items-center gap-3 px-3.5 py-2 {% if active_page == 'faq' %}active{% endif %}">
+          <span class="text-base">❓</span>
+          <span>FAQs</span>
+        </a>
+
+        <a href="/admin/settings" class="admin-nav-item flex items-center gap-3 px-3.5 py-2 {% if active_page == 'settings' %}active{% endif %}">
+          <span class="text-base">⚙️</span>
+          <span>Settings & Password</span>
+        </a>
+
+        <a href="/admin/audit-logs" class="admin-nav-item flex items-center gap-3 px-3.5 py-2 {% if active_page == 'audit_logs' %}active{% endif %}">
+          <span class="text-base">🛡</span>
+          <span>Audit Log</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="p-4 border-t border-slate-100 space-y-2">
+      <a href="/" target="_blank" class="flex items-center justify-between text-xs text-slate-600 hover:text-sky-600 py-2 px-3 rounded-xl hover:bg-sky-50 transition-colors font-medium">
+        <span>Visit Public Store ↗</span>
+      </a>
+      <a href="/admin/logout" class="flex items-center gap-2 text-xs text-rose-600 hover:text-rose-700 py-2 px-3 rounded-xl hover:bg-rose-50 transition-colors font-semibold">
+        <span>Sign Out (admin)</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Top Header -->
+    <header class="h-16 admin-header px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+      <div class="flex items-center gap-3">
+        <button id="admin-mobile-toggle" class="lg:hidden p-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+          <span>{% block header_title %}Admin Console{% endblock %}</span>
+        </h2>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs">
+        <a href="https://t.me/{{ (settings.bot_username or '@abdurea1_bot')|replace('@', '') }}" target="_blank"
+           class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-semibold transition-colors">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Open Bot in Telegram ↗</span>
+        </a>
+        <span class="text-slate-500 hidden md:inline">Logged in as <strong class="text-slate-800">admin</strong></span>
+        <a href="/admin/logout" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold transition-colors">Sign Out</a>
+      </div>
+    </header>
+
+    <!-- Mobile Drawer -->
+    <div id="admin-mobile-drawer" class="hidden lg:hidden bg-white border-b border-slate-200 p-4 space-y-1 text-sm max-h-[75vh] overflow-y-auto shadow-xl">
+      <a href="/admin" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">📊 Dashboard</a>
+      <a href="/admin/orders" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">📦 Orders & Delivery</a>
+      <a href="/admin/services" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">🛍 Products & Pricing</a>
+      <a href="/admin/categories" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">📂 Categories</a>
+      <a href="/admin/promotions" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">🎁 Promotions</a>
+      <a href="/admin/reviews" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">⭐ Customer Reviews</a>
+      <a href="/admin/customers" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">👥 Customers</a>
+      <a href="/admin/contacts" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">💬 Support & Contacts</a>
+      <a href="/admin/bot-content" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">🤖 Bot Messages</a>
+      <a href="/admin/faq" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">❓ FAQ</a>
+      <a href="/admin/settings" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">⚙️ Settings</a>
+      <a href="/admin/audit-logs" class="block py-2 px-3 rounded-xl text-slate-700 hover:bg-sky-50 font-medium">🛡 Audit Log</a>
+      <a href="/admin/logout" class="block py-2 px-3 rounded-xl text-rose-600 font-bold mt-2">Sign Out</a>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="px-4 sm:px-6 pt-4">
+          {% for category, message in messages %}
+            <div class="p-3.5 rounded-xl {% if category == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800{% elif category == 'error' %}bg-rose-50 border border-rose-200 text-rose-800{% else %}bg-sky-50 border border-sky-200 text-sky-800{% endif %} text-xs flex items-center justify-between mb-3 shadow-sm">
+              <div class="flex items-center gap-2 font-medium">
+                <span>{% if category == 'success' %}✓{% elif category == 'error' %}⚠️{% else %}ℹ️{% endif %}</span>
+                <span>{{ message }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 sm:p-6 min-w-0">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script>
+    const mToggle = document.getElementById("admin-mobile-toggle");
+    const mDrawer = document.getElementById("admin-mobile-drawer");
+    if (mToggle && mDrawer) {
+      mToggle.addEventListener("click", () => {
+        mDrawer.classList.toggle("hidden");
+      });
+    }
+  </script>
+</body>
+</html>

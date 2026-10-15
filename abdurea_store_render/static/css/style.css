@@ -1,0 +1,688 @@
+/* ABDUREA STORE — Premium Modern Design System */
+
+:root {
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Light Theme Variables */
+[data-theme="light"] {
+  --bg-body: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
+  --bg-surface-glass: rgba(255, 255, 255, 0.9);
+  --border-subtle: #e2e8f0;
+  --border-prominent: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #334155;
+  --text-light: #64748b;
+  --accent-cyan: #0284c7;
+  --accent-blue: #2563eb;
+  --accent-purple: #7e22ce;
+  --accent-emerald: #059669;
+  --accent-amber: #d97706;
+  --accent-rose: #e11d48;
+  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --card-shadow-hover: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 8px 12px -3px rgba(0, 0, 0, 0.04);
+  --glow-accent: rgba(37, 99, 235, 0.08);
+  --navbar-bg: rgba(255, 255, 255, 0.92);
+  --modal-bg: #ffffff;
+}
+
+/* Dark Theme Variables (Default) */
+[data-theme="dark"] {
+  --bg-body: #090d16;
+  --bg-surface: #111726;
+  --bg-surface-elevated: #1a2236;
+  --bg-surface-glass: rgba(17, 23, 38, 0.82);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-prominent: rgba(255, 255, 255, 0.16);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+  --accent-cyan: #38bdf8;
+  --accent-blue: #60a5fa;
+  --accent-purple: #c084fc;
+  --accent-emerald: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 25px 2px rgba(56, 189, 248, 0.12);
+  --glow-accent: rgba(56, 189, 248, 0.18);
+  --navbar-bg: rgba(9, 13, 22, 0.88);
+  --modal-bg: #111726;
+}
+
+/* Base resets & typography */
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Header & Sticky Navbar */
+.site-header {
+  background-color: var(--navbar-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: all var(--transition-normal);
+}
+
+/* Announcements */
+.announcement-bar {
+  background: linear-gradient(90deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Brand styling */
+.brand-logo-img {
+  height: 40px;
+  width: auto;
+  max-width: 210px;
+  object-fit: contain;
+}
+
+/* Hero Section */
+.hero-glow {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 650px;
+  height: 380px;
+  background: radial-gradient(circle, var(--glow-accent) 0%, rgba(99, 102, 241, 0.06) 50%, transparent 75%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Service Card */
+.service-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.25rem;
+  box-shadow: var(--card-shadow);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-normal);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--border-prominent);
+}
+
+/* Badges */
+.badge-popular {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+}
+.badge-recommended {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #ffffff;
+}
+.badge-premium {
+  background: linear-gradient(135deg, #a855f7, #7e22ce);
+  color: #ffffff;
+}
+.badge-best-value {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+}
+
+/* Status Indicators */
+.status-dot-available {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 9999px;
+  box-shadow: 0 0 8px #10b981;
+}
+.status-dot-limited {
+  width: 8px;
+  height: 8px;
+  background-color: #f59e0b;
+  border-radius: 9999px;
+  box-shadow: 0 0 8px #f59e0b;
+}
+.status-dot-unavailable {
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 9999px;
+}
+
+/* Category Filter Pills */
+.category-pill {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  user-select: none;
+}
+.category-pill:hover,
+.category-pill.active {
+  background: linear-gradient(135deg, #0284c7, #2563eb) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+}
+
+/* Buttons */
+.btn-telegram-primary {
+  background: linear-gradient(135deg, #229ED9 0%, #1e87bb 100%);
+  color: #ffffff;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 15px rgba(34, 158, 217, 0.3);
+}
+.btn-telegram-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(34, 158, 217, 0.45);
+  filter: brightness(1.05);
+}
+
+.btn-secondary-glow {
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+.btn-secondary-glow:hover {
+  border-color: var(--border-prominent);
+  background-color: var(--bg-surface);
+  transform: translateY(-1px);
+}
+
+/* Floating Telegram CTA */
+.floating-telegram-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 40;
+  background: linear-gradient(135deg, #24A1DE 0%, #0088cc 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 136, 204, 0.45);
+  border-radius: 9999px;
+  padding: 0.85rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+.floating-telegram-btn:hover {
+  transform: scale(1.04) translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 136, 204, 0.6);
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .floating-telegram-btn {
+    bottom: 18px;
+    right: 18px;
+    padding: 0.75rem 1.1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity var(--transition-normal);
+}
+
+/* Plan selector button */
+.plan-btn {
+  border: 1.5px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+.plan-btn:hover {
+  border-color: var(--accent-blue);
+  background-color: var(--bg-surface-elevated);
+}
+.plan-btn.selected {
+  border-color: #0284c7 !important;
+  background: rgba(2, 132, 199, 0.08) !important;
+  box-shadow: 0 0 0 1px #0284c7 !important;
+}
+
+/* Accordion FAQ */
+.faq-header {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+.faq-header:hover {
+  color: var(--accent-cyan);
+}
+.faq-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+}
+.faq-item.active .faq-content {
+  max-height: 500px;
+  transition: max-height 0.35s ease-in-out;
+}
+.faq-item.active .faq-chevron {
+  transform: rotate(180deg);
+}
+
+/* Toast notifications */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast-msg {
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-main);
+  border: 1px solid var(--border-prominent);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  border-radius: 9999px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: toastFadeIn 0.25s ease-out forwards;
+  pointer-events: auto;
+}
+@keyframes toastFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Admin Styling Overrides */
+.admin-sidebar {
+  background-color: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+}
+.admin-nav-item {
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  border-radius: 0.5rem;
+}
+.admin-nav-item:hover, .admin-nav-item.active {
+  color: var(--text-main);
+  background-color: var(--bg-surface-elevated);
+}
+.admin-nav-item.active {
+  border-left: 3px solid #0284c7;
+  font-weight: 600;
+}
+
+/* ========================================================= */
+/* COMPREHENSIVE LIGHT MODE COLOR OVERRIDES                  */
+/* ========================================================= */
+[data-theme="light"] {
+  /* High contrast dark texts */
+  --text-main: #0f172a;
+  --text-muted: #334155;
+  --text-light: #64748b;
+}
+
+[data-theme="light"] .text-slate-100,
+[data-theme="light"] .text-slate-200,
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4 {
+  color: #0f172a !important; /* Rich Jet Black */
+}
+
+[data-theme="light"] .text-slate-300 {
+  color: #1e293b !important; /* Deep Dark Slate */
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: #475569 !important; /* Clear Slate Gray */
+}
+
+[data-theme="light"] .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Light Backgrounds */
+[data-theme="light"] .bg-slate-950,
+[data-theme="light"] .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+[data-theme="light"] .bg-slate-900\/80,
+[data-theme="light"] .bg-slate-900\/60,
+[data-theme="light"] .bg-slate-850,
+[data-theme="light"] .bg-slate-850\/70,
+[data-theme="light"] .bg-slate-800 {
+  background-color: #f8fafc !important;
+}
+
+[data-theme="light"] .bg-slate-800\/60,
+[data-theme="light"] .bg-slate-800\/40,
+[data-theme="light"] .bg-slate-800\/30 {
+  background-color: #f1f5f9 !important;
+}
+
+/* Soft Crisp Borders */
+[data-theme="light"] .border-slate-800,
+[data-theme="light"] .border-slate-800\/80,
+[data-theme="light"] .border-slate-800\/60,
+[data-theme="light"] .border-slate-800\/50,
+[data-theme="light"] .border-slate-700,
+[data-theme="light"] .border-slate-700\/80,
+[data-theme="light"] .border-slate-700\/70,
+[data-theme="light"] .border-slate-700\/60,
+[data-theme="light"] .border-slate-700\/50,
+[data-theme="light"] .border-slate-700\/40 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Forms & Inputs */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Price & Accents in Light Mode */
+[data-theme="light"] .text-sky-400 {
+  color: #0284c7 !important; /* Deep Royal Cyan/Blue */
+}
+[data-theme="light"] .text-sky-300 {
+  color: #0369a1 !important;
+}
+
+/* Modals */
+[data-theme="light"] #service-modal-content,
+[data-theme="light"] #payment-modal > div:nth-child(2) {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .bg-sky-950\/40 {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+  color: #0369a1 !important;
+}
+
+/* FAQ items in Light Mode */
+[data-theme="light"] .faq-item {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .faq-header {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .faq-content {
+  color: #334155 !important;
+}
+
+/* Footer in Light Mode */
+[data-theme="light"] footer {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Navigation Links */
+[data-theme="light"] .site-header nav a {
+  color: #334155 !important;
+}
+[data-theme="light"] .site-header nav a:hover {
+  color: #0284c7 !important;
+}
+
+/* Secondary CTA / Buttons */
+[data-theme="light"] .btn-secondary-glow {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+[data-theme="light"] .btn-secondary-glow:hover {
+  background-color: #f8fafc !important;
+  border-color: #0284c7 !important;
+}
+
+/* Recently Viewed Cards in Light Mode */
+[data-theme="light"] #recently-viewed-list > div {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Ethiopian payment highlight banner on home in Light Mode */
+[data-theme="light"] #payment-info > div {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* ==========================================
+   ADMIN DASHBOARD DESIGN SYSTEM ("SEXY BLUE")
+   Palette: #007BFF (Electric Blue) -> #80E0E0 (Ice Cyan)
+   Clean, luminous, uncluttered, simple
+   ========================================== */
+
+/* Sexy Blue Admin Theme (Default & Light Mode) */
+body.admin-body {
+  background: linear-gradient(180deg, #edf6ff 0%, #f4f8fd 40%, #f8fafc 100%) !important;
+  color: #0f172a !important;
+  font-family: var(--font-main);
+  min-height: 100vh;
+}
+
+/* Crisp Clean Admin Cards */
+.admin-card {
+  background-color: #ffffff;
+  border: 1px solid #e2ebf5;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 123, 255, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -4px rgba(0, 123, 255, 0.12);
+  border-color: #bee3f8;
+}
+
+/* Sidebar with Sexy Blue Accents */
+.admin-sidebar {
+  background-color: #ffffff !important;
+  border-right: 1px solid #e2ebf5 !important;
+  box-shadow: 2px 0 16px rgba(0, 123, 255, 0.03);
+}
+
+.admin-nav-item {
+  color: #475569;
+  border-radius: 0.875rem;
+  transition: all 0.15s ease;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-nav-item:hover {
+  color: #007bff;
+  background-color: #f0f7ff;
+}
+
+.admin-nav-item.active {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #007bff 0%, #0066d6 100%) !important;
+  box-shadow: 0 4px 14px rgba(0, 123, 255, 0.35) !important;
+}
+
+/* Sexy Blue Buttons */
+.btn-sexy-blue {
+  background: linear-gradient(135deg, #007bff 0%, #0062cc 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  border-radius: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  box-shadow: 0 4px 14px rgba(0, 123, 255, 0.3);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-sexy-blue:hover {
+  background: linear-gradient(135deg, #0069d9 0%, #0053ba 100%);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-secondary-clean {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary-clean:hover {
+  background-color: #f8fafc;
+  color: #007bff;
+  border-color: #93c5fd;
+}
+
+/* Stat Card Accents */
+.stat-card-stars {
+  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+  border: 1px solid #fef3c7;
+}
+
+.stat-card-action {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  border: 1px solid #bae6fd;
+}
+
+.stat-card-success {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  border: 1px solid #bbf7d0;
+}
+
+.stat-card-cyan {
+  background: linear-gradient(135deg, #ffffff 0%, #e0f7fa 100%);
+  border: 1px solid #b2ebf2;
+}
+
+/* High-Contrast Clear Status Badges */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.badge-paid {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-completed {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #7dd3fc;
+}
+
+.badge-processing {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.badge-unpaid {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.badge-refunded {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+}
+
+.badge-ice {
+  background-color: #e0f7fa;
+  color: #007bff;
+  border: 1px solid #80e0e0;
+}
+
+/* Clean Admin Form Inputs */
+.admin-input {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.625rem 0.875rem !important;
+  color: #0f172a !important;
+  font-size: 0.8125rem !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.admin-input:focus {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15) !important;
+  outline: none !important;
+}
+
+/* Header in Sexy Blue */
+.admin-header {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2ebf5;
+}
+
+/* Sexy Blue Gradient Banner */
+.sexy-blue-banner {
+  background: linear-gradient(135deg, #007bff 0%, #0099ff 50%, #38bdf8 100%);
+  color: #ffffff;
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 123, 255, 0.35);
+}
+
+

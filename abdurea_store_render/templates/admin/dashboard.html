@@ -1,0 +1,229 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Dashboard Overview{% endblock %}
+{% block header_title %}Store Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Welcome / Banner in Sexy Blue Gradient -->
+  <div class="sexy-blue-banner p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-[11px] font-bold backdrop-blur-sm mb-2">
+        <span>✨</span>
+        <span>ABDUREA STORE — Live Telegram Engine</span>
+      </span>
+      <h1 class="text-xl sm:text-2xl font-black text-white">Welcome back, Administrator!</h1>
+      <p class="text-xs sm:text-sm text-sky-100 mt-1 max-w-xl">
+        Manage your digital products, fulfill customer subscriptions, and track your Telegram Stars payments with ease.
+      </p>
+    </div>
+    <div class="flex items-center gap-2.5">
+      <a href="/admin/orders?fulfillment_status=Not+Started" class="px-4 py-2.5 rounded-xl bg-white text-sky-600 hover:bg-sky-50 font-bold text-xs shadow-md transition-all">
+        📦 Orders to Fulfill
+      </a>
+      <a href="/admin/services" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/30 backdrop-blur-sm transition-all">
+        🛍 Products
+      </a>
+    </div>
+  </div>
+
+  <!-- Urgent Action Banner if Pending Orders Exist -->
+  {% if stats.pending_fulfillment > 0 %}
+  <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">⏳</span>
+      <div>
+        <div class="font-bold text-sm text-amber-900">
+          {{ stats.pending_fulfillment }} Order(s) Awaiting Delivery!
+        </div>
+        <div class="text-xs text-amber-700 mt-0.5">
+          Customers have completed payment via Telegram Stars and are waiting for their credentials or activation invite.
+        </div>
+      </div>
+    </div>
+    <a href="/admin/orders?fulfillment_status=Not+Started" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-colors shadow-sm whitespace-nowrap">
+      Fulfill Now →
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- 4 Big Simple Metric Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Revenue -->
+    <div class="admin-card p-5 stat-card-stars">
+      <div class="flex items-center justify-between text-xs text-amber-800 mb-2 font-semibold">
+        <span>Telegram Stars Revenue</span>
+        <span class="text-lg">⭐</span>
+      </div>
+      <div class="text-3xl font-black text-amber-500">
+        ⭐ {{ stats.total_revenue_stars }}
+      </div>
+      <div class="text-[11px] text-amber-700/80 mt-1 font-medium">Verified Stars (XTR) balance</div>
+    </div>
+
+    <!-- Orders Waiting -->
+    <div class="admin-card p-5 stat-card-action">
+      <div class="flex items-center justify-between text-xs text-sky-800 mb-2 font-semibold">
+        <span>Waiting for Delivery</span>
+        <span class="text-lg">⏳</span>
+      </div>
+      <div class="text-3xl font-black {% if stats.pending_fulfillment > 0 %}text-sky-600{% else %}text-slate-800{% endif %}">
+        {{ stats.pending_fulfillment }}
+      </div>
+      <div class="text-[11px] text-sky-700/80 mt-1 font-medium">Orders requiring provisioning</div>
+    </div>
+
+    <!-- Completed Orders -->
+    <div class="admin-card p-5 stat-card-success">
+      <div class="flex items-center justify-between text-xs text-emerald-800 mb-2 font-semibold">
+        <span>Completed Deliveries</span>
+        <span class="text-lg">✅</span>
+      </div>
+      <div class="text-3xl font-black text-emerald-600">
+        {{ stats.completed_orders }}
+      </div>
+      <div class="text-[11px] text-emerald-700/80 mt-1 font-medium">Out of {{ stats.total_orders }} total orders</div>
+    </div>
+
+    <!-- Customers -->
+    <div class="admin-card p-5 stat-card-cyan">
+      <div class="flex items-center justify-between text-xs text-cyan-800 mb-2 font-semibold">
+        <span>Total Customers</span>
+        <span class="text-lg">👥</span>
+      </div>
+      <div class="text-3xl font-black text-cyan-600">
+        {{ stats.total_customers }}
+      </div>
+      <div class="text-[11px] text-cyan-700/80 mt-1 font-medium">Telegram buyers registered</div>
+    </div>
+  </div>
+
+  <!-- Recent Orders Table & Top Services -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Recent Orders (2 cols) -->
+    <div class="lg:col-span-2 admin-card p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Recent Customer Orders</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Orders placed by customers through the Telegram bot</p>
+        </div>
+        <a href="/admin/orders" class="text-xs text-sky-600 hover:text-sky-700 font-bold">View All Orders →</a>
+      </div>
+
+      {% if stats.recent_orders %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead>
+            <tr class="border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider bg-slate-50/60">
+              <th class="py-3 px-3">Order Ref</th>
+              <th class="py-3 px-3">Customer</th>
+              <th class="py-3 px-3">Service &amp; Plan</th>
+              <th class="py-3 px-3">Amount</th>
+              <th class="py-3 px-3">Status</th>
+              <th class="py-3 px-3 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for o in stats.recent_orders %}
+            <tr class="hover:bg-slate-50/70 transition-colors">
+              <td class="py-3.5 px-3 font-mono font-bold text-sky-600">
+                <a href="/admin/orders/{{ o.id }}" class="hover:underline">{{ o.order_ref }}</a>
+              </td>
+              <td class="py-3.5 px-3">
+                <div class="font-bold text-slate-900">{{ o.customer_name }}</div>
+                <div class="text-[11px] text-slate-500">{{ o.customer_email }}</div>
+              </td>
+              <td class="py-3.5 px-3">
+                <div class="font-semibold text-slate-800">{{ o.snapshot_service_name }}</div>
+                <div class="text-[11px] text-slate-500">{{ o.snapshot_plan_duration }}</div>
+              </td>
+              <td class="py-3.5 px-3 font-bold text-amber-500 whitespace-nowrap">
+                ⭐ {{ o.snapshot_price_stars }} XTR
+              </td>
+              <td class="py-3.5 px-3 whitespace-nowrap">
+                {% if o.fulfillment_status == 'Completed' %}
+                  <span class="badge-status badge-completed">✓ Delivered</span>
+                {% elif o.fulfillment_status == 'Processing' %}
+                  <span class="badge-status badge-processing">🔄 Processing</span>
+                {% elif o.fulfillment_status == 'Cancelled' %}
+                  <span class="badge-status badge-refunded">✕ Cancelled</span>
+                {% else %}
+                  <span class="badge-status badge-action">⏳ Waiting</span>
+                {% endif %}
+              </td>
+              <td class="py-3.5 px-3 text-right whitespace-nowrap">
+                <a href="/admin/orders/{{ o.id }}" class="btn-sexy-blue text-[11px] !py-1 !px-3">
+                  Manage
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-12 text-slate-400 text-xs">
+        No orders placed yet. Once customers tap "Pay with Stars" in the bot, orders appear here instantly!
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Quick Shortcuts & Top Products (1 col) -->
+    <div class="space-y-6">
+
+      <!-- Top Services -->
+      <div class="admin-card p-6">
+        <h3 class="text-base font-bold text-slate-900 mb-3">Popular Products</h3>
+        {% if stats.top_services %}
+        <div class="space-y-2.5">
+          {% for s in stats.top_services %}
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+            <div>
+              <div class="font-bold text-slate-800">{{ s.name }}</div>
+              <div class="text-[10px] text-slate-500">{{ s.orders_count }} paid orders</div>
+            </div>
+            <div class="text-right">
+              <div class="font-black text-amber-500">⭐ {{ s.revenue_stars }}</div>
+              <div class="text-[10px] text-slate-400">XTR</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-6 text-slate-400 text-xs">
+          Product sales metrics will populate as orders are completed.
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="admin-card p-6">
+        <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3">Quick Navigation</h3>
+        <div class="grid grid-cols-2 gap-2.5 text-xs font-semibold">
+          <a href="/admin/services" class="p-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-100 flex flex-col items-center gap-1.5 transition-colors">
+            <span class="text-lg">🛍</span>
+            <span>All Products</span>
+          </a>
+          <a href="/admin/promotions" class="p-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-100 flex flex-col items-center gap-1.5 transition-colors">
+            <span class="text-lg">🎁</span>
+            <span>Promotions</span>
+          </a>
+          <a href="/admin/contacts" class="p-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-100 flex flex-col items-center gap-1.5 transition-colors">
+            <span class="text-lg">💬</span>
+            <span>Support Link</span>
+          </a>
+          <a href="/admin/bot-content" class="p-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-100 flex flex-col items-center gap-1.5 transition-colors">
+            <span class="text-lg">🤖</span>
+            <span>Bot Text</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

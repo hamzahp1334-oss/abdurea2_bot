@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}Services — Abdurea Store{% endblock %}
+
+{% block content %}
+<div class="page-title-section">
+  <div>
+    <h1 class="page-heading">Services</h1>
+    <p class="page-subtitle">Manage your digital services and plans</p>
+  </div>
+
+  <div>
+    <button class="btn-add-service-blue" onclick="openAddServiceDrawer()">
+      <i data-feather="plus" style="width: 16px; height: 16px;"></i>
+      <span>+ Add Service</span>
+    </button>
+  </div>
+</div>
+
+<!-- Services List (Exact match to Image 3) -->
+<div class="services-list-container" id="servicesContainer">
+  {% for p in products %}
+  <div class="service-card-item" id="service-item-{{ p.id }}">
+    <div class="service-item-left">
+      <!-- Logo Image or Fallback Icon -->
+      {% if p.image_url %}
+        <img src="{{ p.image_url }}" alt="{{ p.name }}" class="service-logo-sq">
+      {% else %}
+        <div class="service-logo-sq" style="font-size: 22px;">
+          {% if 'netflix' in p.name|lower %}📺
+          {% elif 'internet' in p.name|lower %}🌐
+          {% elif 'duolingo' in p.name|lower %}🦉
+          {% elif 'apple' in p.name|lower %}🍎
+          {% elif 'telegram' in p.name|lower %}⭐
+          {% elif 'gemini' in p.name|lower %}💎
+          {% elif 'canva' in p.name|lower %}🎨
+          {% elif 'chatgpt' in p.name|lower %}⚡
+          {% else %}📦{% endif %}
+        </div>
+      {% endif %}
+
+      <div class="service-item-details">
+        <div class="service-title-text">{{ p.name }}</div>
+        <div class="service-sub-text">{{ p.short_description or p.description[:90] }}</div>
+        
+        <!-- Badges (Featured, Popular, Unavailable, Premium) -->
+        <div class="service-badges-row">
+          {% if p.status == 'inactive' %}
+            <span class="tag-badge tag-unavailable">UNAVAILABLE</span>
+          {% endif %}
+          {% if p.is_featured %}
+            <span class="tag-badge tag-featured">FEATURED</span>
+          {% endif %}
+          {% if p.is_popular %}
+            <span class="tag-badge tag-popular">POPULAR</span>
+          {% endif %}
+          {% if p.is_premium %}
+            <span class="tag-badge tag-premium">PREMIUM</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Action Icons (Edit, Copy, Trash) -->
+    <div class="service-actions-right">
+      <button class="icon-action-btn" onclick="openEditServiceDrawer({{ p.id }})" title="Edit Service">
+        <i data-feather="edit-2" style="width: 17px; height: 17px;"></i>
+      </button>
+      <button class="icon-action-btn" onclick="duplicateService({{ p.id }})" title="Duplicate Plan">
+        <i data-feather="copy" style="width: 17px; height: 17px;"></i>
+      </button>
+      <button class="icon-action-btn delete" onclick="deleteService({{ p.id }}, '{{ p.name }}')" title="Delete Service">
+        <i data-feather="trash-2" style="width: 17px; height: 17px;"></i>
+      </button>
+    </div>
+  </div>
+  {% else %}
+  <div style="background: white; border: 1px solid var(--surface-border); border-radius: 16px; padding: 40px; text-align: center; color: var(--text-muted);">
+    No services added yet. Click "+ Add Service" to create your first pro package!
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Slide-out Drawer for Add / Edit Service (Exact match to Images 4 & 5) -->
+<div class="service-modal-overlay" id="serviceDrawerOverlay">
+  <div class="service-drawer-panel">
+    <div class="drawer-top-bar">
+      <h3 class="drawer-heading" id="drawerTitle">Add Service</h3>
+      <button class="drawer-close" onclick="closeServiceDrawer()">&times;</button>
+    </div>
+
+    <form id="serviceForm" onsubmit="submitServiceForm(event)" class="drawer-content-scroll">
+      <input type="hidden" id="serviceId">
+
+      <!-- Service Name -->
+      <div class="field-group">
+        <label class="field-title">Service Name</label>
+        <input type="text" id="srvName" class="text-input-clean" placeholder="e.g. Gemini Pro" required>
+      </div>
+
+      <!-- Short Description -->
+      <div class="field-group">
+        <label class="field-title">Short Description</label>
+        <input type="text" id="srvShortDesc" class="text-input-clean" placeholder="One-line description">
+      </div>
+
+      <!-- Full Description -->
+      <div class="field-group">
+        <label class="field-title">Full Description</label>
+        <textarea id="srvFullDesc" class="textarea-clean" rows="3" placeholder="Full service details, warranty, access instructions..."></textarea>
+      </div>
+
+      <!-- Service Image (Upload or Paste URL) -->
+      <div class="field-group">
+        <label class="field-title">Service Image</label>
+        <div class="image-upload-row">
+          <input type="file" id="srvImageFile" style="display:none;" onchange="uploadImageFile(this)">
+          <button type="button" class="btn-upload-box" onclick="document.getElementById('srvImageFile').click()">
+            <i data-feather="upload" style="width: 14px; height: 14px;"></i>
+            <span>Upload</span>
+          </button>
+          <input type="text" id="srvImageUrl" class="text-input-clean" placeholder="Or paste image URL">
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="field-group">
+        <label class="field-title">Category</label>
+        <select id="srvCategory" class="select-clean">
+          <option value="Uncategorized">Uncategorized</option>
+          <option value="AI Tools">AI Tools</option>
+          <option value="Streaming">Streaming</option>
+          <option value="Subscriptions">Subscriptions</option>
+          <option value="Design">Design</option>
+          <option value="Education">Education</option>
+          <option value="Video Editing">Video Editing</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- Availability -->
+      <div class="field-group">
+        <label class="field-title">Availability</label>
+        <select id="srvAvailability" class="select-clean">
+          <option value="active">Available</option>
+          <option value="inactive">Unavailable</option>
+        </select>
+      </div>
+
+      <!-- Price & Duration -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="field-group">
+          <label class="field-title">Price (ETB)</label>
+          <input type="number" step="0.5" id="srvPrice" class="text-input-clean" placeholder="e.g. 350" required>
+        </div>
+        <div class="field-group">
+          <label class="field-title">Duration</label>
+          <input type="text" id="srvDuration" class="text-input-clean" placeholder="e.g. 1 Month" value="1 Month">
+        </div>
+      </div>
+
+      <!-- Sort Order -->
+      <div class="field-group">
+        <label class="field-title">Sort Order</label>
+        <input type="number" id="srvSortOrder" class="text-input-clean" value="0">
+      </div>
+
+      <!-- Features -->
+      <div class="field-group">
+        <label class="field-title">Features (one per line)</label>
+        <textarea id="srvFeatures" class="textarea-clean" rows="3" placeholder="4K Ultra HD&#10;Private Screen with PIN&#10;Instant Activation"></textarea>
+      </div>
+
+      <!-- Requirements -->
+      <div class="field-group">
+        <label class="field-title">Requirements (one per line)</label>
+        <textarea id="srvRequirements" class="textarea-clean" rows="2" placeholder="Email address or account username"></textarea>
+      </div>
+
+      <!-- Important Notes -->
+      <div class="field-group">
+        <label class="field-title">Important Notes</label>
+        <textarea id="srvNotes" class="textarea-clean" rows="2" placeholder="Warranty details or rules"></textarea>
+      </div>
+
+      <!-- 4 Switch Toggles (Images 4 & 5) -->
+      <div class="toggles-2x2-grid">
+        <div class="switch-item">
+          <span class="switch-label">Featured</span>
+          <label class="switch-toggle">
+            <input type="checkbox" id="srvFeatured">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+        <div class="switch-item">
+          <span class="switch-label">Popular</span>
+          <label class="switch-toggle">
+            <input type="checkbox" id="srvPopular">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+        <div class="switch-item">
+          <span class="switch-label">Recommended</span>
+          <label class="switch-toggle">
+            <input type="checkbox" id="srvRecommended">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+        <div class="switch-item">
+          <span class="switch-label">Premium</span>
+          <label class="switch-toggle">
+            <input type="checkbox" id="srvPremium">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Broadcast to All Telegram Users Toggle -->
+      <div style="margin-top: 14px; background: #f0f7ff; padding: 12px 14px; border-radius: 12px; border: 1px solid #bfdbfe; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="font-weight: 600; color: #1d4ed8; font-size: 13px;">📢 Broadcast to All Telegram Users</div>
+          <div style="font-size: 11px; color: #3b82f6;">Instantly alert all bot users when this service is saved</div>
+        </div>
+        <label class="switch-toggle" style="margin: 0;">
+          <input type="checkbox" id="srvNotifyUsers" checked>
+          <span class="slider-round"></span>
+        </label>
+      </div>
+
+      <div class="drawer-footer-actions">
+        <button type="button" class="btn-upload-box" onclick="closeServiceDrawer()">Cancel</button>
+        <button type="submit" class="btn-add-service-blue">Save Service</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openAddServiceDrawer() {
+    document.getElementById('drawerTitle').innerText = 'Add Service';
+    document.getElementById('serviceId').value = '';
+    document.getElementById('srvName').value = '';
+    document.getElementById('srvShortDesc').value = '';
+    document.getElementById('srvFullDesc').value = '';
+    document.getElementById('srvImageUrl').value = '';
+    document.getElementById('srvCategory').value = 'Uncategorized';
+    document.getElementById('srvAvailability').value = 'active';
+    document.getElementById('srvPrice').value = '';
+    document.getElementById('srvDuration').value = '1 Month';
+    document.getElementById('srvSortOrder').value = '0';
+    document.getElementById('srvFeatures').value = '';
+    document.getElementById('srvRequirements').value = '';
+    document.getElementById('srvNotes').value = '';
+    document.getElementById('srvFeatured').checked = false;
+    document.getElementById('srvPopular').checked = false;
+    document.getElementById('srvRecommended').checked = false;
+    document.getElementById('srvPremium').checked = false;
+    document.getElementById('srvNotifyUsers').checked = true;
+
+    document.getElementById('serviceDrawerOverlay').classList.add('active');
+  }
+
+  function closeServiceDrawer() {
+    document.getElementById('serviceDrawerOverlay').classList.remove('active');
+  }
+
+  async function openEditServiceDrawer(id) {
+    try {
+      const res = await fetch(`/api/products/${id}`);
+      const data = await res.json();
+      if (data.status === 'success') {
+        const p = data.product;
+        document.getElementById('drawerTitle').innerText = 'Edit Service';
+        document.getElementById('serviceId').value = p.id;
+        document.getElementById('srvName').value = p.name;
+        document.getElementById('srvShortDesc').value = p.short_description || '';
+        document.getElementById('srvFullDesc').value = p.description || '';
+        document.getElementById('srvImageUrl').value = p.image_url || '';
+        document.getElementById('srvCategory').value = p.category;
+        document.getElementById('srvAvailability').value = p.status;
+        document.getElementById('srvPrice').value = p.price;
+        document.getElementById('srvDuration').value = p.duration || '1 Month';
+        document.getElementById('srvSortOrder').value = p.sort_order || 0;
+        document.getElementById('srvFeatures').value = p.features || '';
+        document.getElementById('srvRequirements').value = p.requirements || '';
+        document.getElementById('srvNotes').value = p.notes || '';
+        document.getElementById('srvFeatured').checked = Boolean(p.is_featured);
+        document.getElementById('srvPopular').checked = Boolean(p.is_popular);
+        document.getElementById('srvRecommended').checked = Boolean(p.is_recommended);
+        document.getElementById('srvPremium').checked = Boolean(p.is_premium);
+        document.getElementById('srvNotifyUsers').checked = false;
+
+        document.getElementById('serviceDrawerOverlay').classList.add('active');
+      }
+    } catch (e) {
+      alert('Error loading service data');
+    }
+  }
+
+  async function uploadImageFile(input) {
+    if (!input.files || !input.files[0]) return;
+    const formData = new FormData();
+    formData.append('file', input.files[0]);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        document.getElementById('srvImageUrl').value = data.url;
+        showToast('Image uploaded successfully!');
+      }
+    } catch (err) {
+      alert('Failed to upload image');
+    }
+  }
+
+  async function submitServiceForm(e) {
+    e.preventDefault();
+    const id = document.getElementById('serviceId').value;
+    const payload = {
+      name: document.getElementById('srvName').value.trim(),
+      short_description: document.getElementById('srvShortDesc').value.trim(),
+      description: document.getElementById('srvFullDesc').value.trim(),
+      image_url: document.getElementById('srvImageUrl').value.trim(),
+      category: document.getElementById('srvCategory').value,
+      status: document.getElementById('srvAvailability').value,
+      price: document.getElementById('srvPrice').value,
+      duration: document.getElementById('srvDuration').value,
+      sort_order: document.getElementById('srvSortOrder').value,
+      features: document.getElementById('srvFeatures').value,
+      requirements: document.getElementById('srvRequirements').value,
+      notes: document.getElementById('srvNotes').value,
+      is_featured: document.getElementById('srvFeatured').checked,
+      is_popular: document.getElementById('srvPopular').checked,
+      is_recommended: document.getElementById('srvRecommended').checked,
+      is_premium: document.getElementById('srvPremium').checked,
+      notify_users: document.getElementById('srvNotifyUsers').checked
+    };
+
+    const url = id ? `/api/products/${id}` : '/api/products';
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        showToast(result.message);
+        closeServiceDrawer();
+        setTimeout(() => location.reload(), 600);
+      } else {
+        alert(result.message || 'Error saving service');
+      }
+    } catch (err) {
+      alert('Network error saving service');
+    }
+  }
+
+  async function duplicateService(id) {
+    try {
+      const res = await fetch(`/api/products/${id}/duplicate`, { method: 'POST' });
+      const data = await res.json();
+      if (data.status === 'success') {
+        showToast('Service duplicated successfully!');
+        setTimeout(() => location.reload(), 600);
+      }
+    } catch (e) {
+      alert('Error duplicating service');
+    }
+  }
+
+  async function deleteService(id, name) {
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.status === 'success') {
+        showToast(`"${name}" deleted.`);
+        const el = document.getElementById(`service-item-${id}`);
+        if (el) el.remove();
+      }
+    } catch (e) {
+      alert('Error deleting service');
+    }
+  }
+</script>
+{% endblock %}

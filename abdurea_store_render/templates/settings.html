@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Settings — Abdurea Store{% endblock %}
+
+{% block content %}
+<div class="page-title-section">
+  <div>
+    <h1 class="page-heading">Settings</h1>
+    <p class="page-subtitle">Configure payment accounts, Telegram bot token, and administrator credentials</p>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px;">
+  <!-- Settings Form -->
+  <div style="background: white; border: 1px solid var(--surface-border); border-radius: var(--radius-card); padding: 28px;">
+    <form id="settingsForm" onsubmit="saveSettings(event)" style="display:flex; flex-direction:column; gap:22px;">
+      <!-- Ethiopian Payment Methods -->
+      <div>
+        <h3 style="font-size: 16px; font-weight: 800; display:flex; align-items:center; gap:8px; margin-bottom: 16px;">
+          <i data-feather="credit-card" style="width: 18px; height: 18px; color: var(--primary);"></i>
+          <span>Official Ethiopian Payment Accounts</span>
+        </h3>
+
+        <!-- Telebirr -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+          <div style="font-weight: 700; color: #1e40af; margin-bottom: 12px; font-size: 13.5px;">
+            📱 Telebirr Account Details
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="field-group">
+              <label class="field-title">Telebirr Phone</label>
+              <input type="text" id="telebirr_phone" class="text-input-clean" value="{{ settings.telebirr_phone }}" required>
+            </div>
+            <div class="field-group">
+              <label class="field-title">Recipient Name</label>
+              <input type="text" id="telebirr_name" class="text-input-clean" value="{{ settings.telebirr_name }}" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- CBE -->
+        <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 14px; padding: 18px;">
+          <div style="font-weight: 700; color: #6b21a8; margin-bottom: 12px; font-size: 13.5px;">
+            🏦 Commercial Bank of Ethiopia (CBE) Details
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="field-group">
+              <label class="field-title">CBE Account Number</label>
+              <input type="text" id="cbe_account" class="text-input-clean" value="{{ settings.cbe_account }}" required>
+            </div>
+            <div class="field-group">
+              <label class="field-title">Recipient Name</label>
+              <input type="text" id="cbe_name" class="text-input-clean" value="{{ settings.cbe_name }}" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telegram Bot Configuration -->
+      <div style="padding-top: 10px; border-top: 1px solid var(--surface-border);">
+        <h3 style="font-size: 16px; font-weight: 800; display:flex; align-items:center; gap:8px; margin-bottom: 16px;">
+          <i data-feather="cpu" style="width: 18px; height: 18px; color: var(--primary);"></i>
+          <span>Telegram Bot Credentials</span>
+        </h3>
+
+        <div class="field-group" style="margin-bottom: 14px;">
+          <label class="field-title">Telegram Bot Token (from @BotFather)</label>
+          <input type="password" id="bot_token" class="text-input-clean" value="{{ settings.bot_token }}" placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ">
+          <small style="color: var(--text-light); font-size: 11px; margin-top: 4px; display:block;">
+            Message <b>@BotFather</b> on Telegram, create a bot, copy the token and paste it here.
+          </small>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div class="field-group">
+            <label class="field-title">Admin Telegram Handle</label>
+            <input type="text" id="admin_telegram" class="text-input-clean" value="{{ settings.admin_telegram }}" placeholder="@trust994">
+          </div>
+          <div class="field-group">
+            <label class="field-title">Admin Numeric ID (Optional)</label>
+            <input type="text" id="admin_telegram_id" class="text-input-clean" value="{{ settings.admin_telegram_id }}" placeholder="e.g. 987654321">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-title">Store Brand Name</label>
+          <input type="text" id="store_name" class="text-input-clean" value="{{ settings.store_name }}">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <button type="submit" class="btn-add-service-blue" id="saveSettingsBtn">
+          <i data-feather="save" style="width: 15px; height: 15px;"></i>
+          <span>Save Settings</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Side info card -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    <div style="background: white; border: 1px solid var(--surface-border); border-radius: var(--radius-card); padding: 24px;">
+      <h3 style="font-size: 15px; font-weight: 800; margin-bottom: 12px;">Active Bank Information</h3>
+      <div style="font-size: 13.5px; display: flex; flex-direction: column; gap: 10px; color: var(--text-main);">
+        <div><b>Telebirr:</b> 0992558519 (FARHAN)</div>
+        <div><b>CBE:</b> 1000572238575 (FARHAN)</div>
+        <div><b>Support Handle:</b> @trust994</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function saveSettings(e) {
+    e.preventDefault();
+    const btn = document.getElementById('saveSettingsBtn');
+    btn.disabled = true;
+
+    const data = {
+      telebirr_phone: document.getElementById('telebirr_phone').value.trim(),
+      telebirr_name: document.getElementById('telebirr_name').value.trim(),
+      cbe_account: document.getElementById('cbe_account').value.trim(),
+      cbe_name: document.getElementById('cbe_name').value.trim(),
+      bot_token: document.getElementById('bot_token').value.trim(),
+      admin_telegram: document.getElementById('admin_telegram').value.trim(),
+      admin_telegram_id: document.getElementById('admin_telegram_id').value.trim(),
+      store_name: document.getElementById('store_name').value.trim()
+    };
+
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        showToast('Settings saved successfully!');
+      } else {
+        alert('Error saving settings');
+      }
+    } catch (err) {
+      alert('Network error saving settings');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+</script>
+{% endblock %}

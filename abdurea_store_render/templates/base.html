@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Abdurea Store{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:box.svg?color=%230066ff">
+  <!-- Feather Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body>
+
+<!-- Backdrop for side drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+
+<!-- Off-canvas Sidebar Drawer -->
+<aside class="nav-drawer" id="navDrawer">
+  <div class="drawer-header">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <!-- Abdurea Logo SVG -->
+      <svg class="abdurea-logo-svg" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 6L9 32H16L19 25H25L28 32H35L22 6ZM22 13L24 20H20L22 13Z" fill="#09090b"/>
+        <path d="M12 18L5 22L12 26V18Z" fill="#0066ff"/>
+        <path d="M32 18L39 22L32 26V18Z" fill="#0066ff"/>
+        <text x="44" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="16" letter-spacing="1" fill="#09090b">ABDUREA</text>
+        <text x="44" y="33" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="8" letter-spacing="2" fill="#71717a">STORE</text>
+      </svg>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+  </div>
+
+  <nav class="drawer-nav">
+    <a href="{{ url_for('dashboard_view') }}" class="drawer-item {% if active_page == 'dashboard' %}active{% endif %}">
+      <i data-feather="grid"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('products_view') }}" class="drawer-item {% if active_page == 'services' %}active{% endif %}">
+      <i data-feather="box"></i>
+      <span>Services</span>
+    </a>
+    <a href="{{ url_for('orders_view') }}" class="drawer-item {% if active_page == 'orders' %}active{% endif %}">
+      <i data-feather="shopping-bag"></i>
+      <span>Orders</span>
+      {% if stats and stats.pending_orders > 0 %}
+        <span class="drawer-badge">{{ stats.pending_orders }}</span>
+      {% endif %}
+    </a>
+    <a href="{{ url_for('customers_view') }}" class="drawer-item {% if active_page == 'customers' %}active{% endif %}">
+      <i data-feather="users"></i>
+      <span>Customers</span>
+    </a>
+    <a href="{{ url_for('broadcast_view') }}" class="drawer-item {% if active_page == 'broadcast' %}active{% endif %}">
+      <i data-feather="send"></i>
+      <span>Broadcast Messages</span>
+    </a>
+    <a href="{{ url_for('settings_view') }}" class="drawer-item {% if active_page == 'settings' %}active{% endif %}">
+      <i data-feather="settings"></i>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <div style="padding-top: 18px; border-top: 1px solid var(--surface-border); display: flex; flex-direction: column; gap: 6px;">
+    <a href="https://t.me/trust994" target="_blank" class="drawer-item">
+      <i data-feather="help-circle"></i>
+      <span>Support @trust994</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Top Header Navbar (Matches screenshots) -->
+<header class="top-header">
+  <div class="header-left">
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleDrawer()" aria-label="Toggle navigation">
+      <i data-feather="menu" style="width: 20px; height: 20px;"></i>
+    </button>
+
+    <a href="{{ url_for('dashboard_view') }}" class="abdurea-brand">
+      <svg class="abdurea-logo-svg" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 6L9 32H16L19 25H25L28 32H35L22 6ZM22 13L24 20H20L22 13Z" fill="#09090b"/>
+        <path d="M12 18L5 22L12 26V18Z" fill="#0066ff"/>
+        <path d="M32 18L39 22L32 26V18Z" fill="#0066ff"/>
+        <text x="44" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="16" letter-spacing="1" fill="#09090b">ABDUREA</text>
+        <text x="44" y="33" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="8" letter-spacing="2" fill="#71717a">STORE</text>
+      </svg>
+    </a>
+  </div>
+
+  <div class="header-right">
+    <a href="{{ url_for('orders_view') }}" class="hamburger-btn" title="Pending Orders" style="position: relative;">
+      <i data-feather="bell" style="width: 18px; height: 18px;"></i>
+      {% if stats and stats.pending_orders > 0 %}
+        <span style="position:absolute; top:8px; right:8px; width:8px; height:8px; background:#ef4444; border-radius:50%;"></span>
+      {% endif %}
+    </a>
+  </div>
+</header>
+
+<!-- Main Body -->
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Toast -->
+<div id="toastNotice" class="toast-notice">Notification</div>
+
+<script>
+  feather.replace();
+
+  function toggleDrawer() {
+    document.getElementById('navDrawer').classList.toggle('open');
+    document.getElementById('drawerBackdrop').classList.toggle('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('navDrawer').classList.remove('open');
+    document.getElementById('drawerBackdrop').classList.remove('open');
+  }
+
+  function showToast(text, duration = 3200) {
+    const toast = document.getElementById('toastNotice');
+    toast.textContent = text;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, duration);
+  }
+</script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

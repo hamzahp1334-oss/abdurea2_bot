@@ -1,0 +1,251 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Promotions & Announcements{% endblock %}
+{% block header_title %}Promotions & Announcement Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Info Pill -->
+  <div class="p-4 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-between text-xs text-sky-900">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">🎁</span>
+      <div>
+        <div class="font-bold text-slate-900">Active Campaign System</div>
+        <div class="text-[11px] text-slate-500">Active promotions appear on the storefront banner, in the bot welcome message, and via the <code class="bg-sky-100/60 px-1.5 py-0.5 rounded font-mono text-sky-800 font-bold">/offers</code> command.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Col (7 cols): Campaign Creator / Editor -->
+    <div class="lg:col-span-7 admin-card p-6 space-y-4">
+      <div class="border-b border-slate-100 pb-3">
+        <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+          <span>✨</span>
+          <span id="form-title">Create New Promotional Campaign</span>
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Publish flash deals, discounts, or service announcements directly to your customers.</p>
+      </div>
+
+      <form method="POST" action="/admin/promotions/save" enctype="multipart/form-data" class="space-y-4 text-xs">
+        <input type="hidden" name="promo_id" id="input_promo_id" value="">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Campaign Title (Internal Reference) *</label>
+          <input type="text" name="title" id="input_title" required placeholder="e.g. Flash Sale — AI Pro Subscriptions"
+                 class="w-full admin-input font-medium"
+                 oninput="updatePreview()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Customer-Facing Display Text *</label>
+          <textarea name="display_text" id="input_display_text" rows="3" required placeholder="e.g. 🔥 Flash Deal: Save on Gemini Pro & ChatGPT Plus this week! Fast delivery & 24/7 warranty."
+                    class="w-full admin-input font-medium"
+                    oninput="updatePreview()"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Call-To-Action (CTA) Type</label>
+            <select name="cta_type" id="input_cta_type" class="w-full admin-input font-medium">
+              <option value="category">Browse Category</option>
+              <option value="service">Open Specific Service</option>
+              <option value="custom">General Catalog</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Target Slug or Identifier</label>
+            <input type="text" name="cta_target" id="input_cta_target" placeholder="e.g. ai-tools or gemini-pro"
+                   class="w-full admin-input font-medium font-mono text-slate-700">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Display Priority (Higher = First)</label>
+            <input type="number" name="priority" id="input_priority" value="10"
+                   class="w-full admin-input font-medium">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Campaign Artwork (Optional)</label>
+            <input type="file" name="artwork_file" accept="image/*"
+                   class="w-full text-slate-500 text-xs file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" id="input_is_active" name="is_active" value="1" checked
+                   class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500">
+            <span class="text-xs text-slate-700 font-semibold select-none">
+              Active and visible to customers in Telegram Bot and Web Store
+            </span>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
+          <button type="submit" class="btn-sexy-blue flex-1 py-2.5 text-xs">
+            Save Campaign
+          </button>
+          <button type="button" onclick="resetPromoForm()" class="btn-secondary-clean py-2.5 px-4 text-xs">
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Col (5 cols): Live Promotional Preview Card -->
+    <div class="lg:col-span-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h4 class="text-xs uppercase tracking-wider font-bold text-slate-500">Live Card Preview</h4>
+        <span class="badge-status badge-ice text-[10px]">Native Bot View</span>
+      </div>
+
+      <!-- Preview Card styled with Sexy Blue Gradient -->
+      <div class="p-6 rounded-3xl sexy-blue-banner relative overflow-hidden text-white font-sans shadow-xl">
+        <!-- Header pill & timer -->
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-[10px] font-bold text-white">
+            <span>✨</span>
+            <span>በቴሌግራም ቀጥታ ማዘዣ</span>
+          </div>
+          <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/20 backdrop-blur-sm text-[10px] font-mono text-cyan-200 border border-white/10">
+            <span>⏱ 07 : 37 : 44</span>
+          </div>
+        </div>
+
+        <!-- Center content -->
+        <div class="mb-5 space-y-2">
+          <div class="inline-block px-3 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-xs tracking-wider shadow-sm">
+            🔥 SPECIAL OFFER
+          </div>
+
+          <h3 id="prev_title" class="text-lg font-black leading-tight text-white drop-shadow-sm">
+            Flash Sale — AI Pro Subscriptions
+          </h3>
+          <p id="prev_text" class="text-xs text-sky-50 leading-relaxed font-normal">
+            🔥 Flash Deal: Save on Gemini Pro &amp; ChatGPT Plus this week! Fast delivery &amp; full warranty.
+          </p>
+        </div>
+
+        <!-- Action preview buttons -->
+        <div class="flex items-center gap-2 pt-2 border-t border-white/20">
+          <div class="flex-1 py-2 px-3 rounded-xl bg-white text-sky-700 font-bold text-xs text-center shadow-md">
+            በቴሌግራም ይዘዙ →
+          </div>
+          <div class="py-2 px-3 rounded-xl bg-white/20 border border-white/30 text-white font-semibold text-xs text-center">
+            ዝርዝር
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 admin-card text-xs text-slate-500 space-y-1.5">
+        <div class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+          <span>🤖</span>
+          <span>Telegram Integration:</span>
+        </div>
+        <p class="text-[11px] leading-relaxed">
+          Inside the Telegram Bot, this campaign is sent with the uploaded banner in <code class="text-sky-700 font-mono font-semibold">/offers</code> and highlighted in the <code class="text-sky-700 font-mono font-semibold">/start</code> welcome screen with instant action buttons.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Existing Campaigns Table -->
+  <div class="admin-card overflow-hidden mt-6">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">All Active & Past Campaigns</span>
+      <span class="text-xs font-semibold text-slate-500">{{ promotions|length }} campaigns</span>
+    </div>
+
+    {% if promotions %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-700">
+        <thead class="text-slate-500 uppercase bg-slate-50 border-b border-slate-200 text-[10px] font-bold tracking-wider">
+          <tr>
+            <th class="py-3.5 px-5">Campaign Title</th>
+            <th class="py-3.5 px-5">Display Message</th>
+            <th class="py-3.5 px-5">CTA Link</th>
+            <th class="py-3.5 px-5 text-center">Priority</th>
+            <th class="py-3.5 px-5 text-center">Status</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          {% for p in promotions %}
+          <tr class="hover:bg-sky-50/40 transition-colors">
+            <td class="py-4 px-5 font-bold text-slate-900 text-sm">{{ p.title }}</td>
+            <td class="py-4 px-5 text-slate-600 max-w-xs truncate">{{ p.display_text }}</td>
+            <td class="py-4 px-5 font-mono text-sky-700 text-xs">
+              <span class="px-2 py-0.5 rounded bg-sky-50 border border-sky-200 font-semibold">{{ p.cta_type }}: {{ p.cta_target or 'default' }}</span>
+            </td>
+            <td class="py-4 px-5 text-center font-bold text-slate-800">{{ p.priority }}</td>
+            <td class="py-4 px-5 text-center">
+              {% if p.is_active %}
+                <span class="badge-status badge-paid text-[10px]">Active</span>
+              {% else %}
+                <span class="badge-status badge-unpaid text-[10px]">Disabled</span>
+              {% endif %}
+            </td>
+            <td class="py-4 px-5 text-right space-x-2 whitespace-nowrap">
+              <button type="button" onclick='editPromo({{ p|tojson }})' class="px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs border border-sky-200 transition-colors">
+                Edit
+              </button>
+              <a href="/admin/promotions/delete/{{ p.id }}" onclick="return confirm('Delete this promotion?');"
+                 class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs border border-rose-200 transition-colors">
+                Delete
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-slate-500 text-xs">
+      <p class="font-semibold text-slate-700 text-sm">No campaigns yet</p>
+      <p class="text-slate-400 mt-1">Create your first promotional campaign using the form above.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+  function updatePreview() {
+    const t = document.getElementById("input_title").value;
+    const d = document.getElementById("input_display_text").value;
+    if (t) document.getElementById("prev_title").innerText = t;
+    if (d) document.getElementById("prev_text").innerText = d;
+  }
+
+  function editPromo(p) {
+    document.getElementById("form-title").innerText = "Edit Campaign: " + p.title;
+    document.getElementById("input_promo_id").value = p.id;
+    document.getElementById("input_title").value = p.title;
+    document.getElementById("input_display_text").value = p.display_text;
+    document.getElementById("input_cta_type").value = p.cta_type || "service";
+    document.getElementById("input_cta_target").value = p.cta_target || "";
+    document.getElementById("input_priority").value = p.priority || 0;
+    document.getElementById("input_is_active").checked = p.is_active == 1;
+    updatePreview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetPromoForm() {
+    document.getElementById("form-title").innerText = "Create New Promotional Campaign";
+    document.getElementById("input_promo_id").value = "";
+    document.getElementById("input_title").value = "";
+    document.getElementById("input_display_text").value = "";
+    document.getElementById("input_cta_target").value = "";
+    document.getElementById("input_priority").value = "10";
+    document.getElementById("input_is_active").checked = true;
+    updatePreview();
+  }
+</script>
+{% endblock %}
