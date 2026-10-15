@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: abdurea-store
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run_bots.py
+    autoDeploy: true
+    envVars:
+      - key: MAIN_BOT_TOKEN
+        value: 8848082794:AAEzNGEQYHD9dpTqe9kbUFBJhJ9n5OK4NIA
+      - key: ADMIN_BOT_TOKEN
+        value: 8920397884:AAHOFpkA-IhcBcCVE5MibMAdj8a6WMfm8gA
+      - key: ADMIN_TELEGRAM_ID
+        value: "6666443909"
+      - key: ADMIN_TELEGRAM_IDS
+        value: "6666443909,2145055956"
+      - key: ADMIN_TELEGRAM_USERNAME
+        value: "@trust994"
+      - key: TELEBIRR_ACCOUNT
+        value: "0992558519"
+      - key: TELEBIRR_NAME
+        value: "𝙁𝘼𝙍𝙃𝘼𝙉"
+      - key: CBE_BIRR_ACCOUNT
+        value: "1000572238575"
+      - key: CBE_BIRR_NAME
+        value: "𝙁𝘼𝙍𝙃𝘼𝙉"
+      - key: SUPPORT_USERNAME
+        value: "@trust994"
+      - key: OFFICIAL_CHANNEL_USERNAME
+        value: "@abdurea1"
+      - key: OFFICIAL_CHANNEL_URL
+        value: "https://t.me/abdurea1"
+      - key: OFFICIAL_CHANNEL_ID
+        value: "-1002546804176"
+      - key: REQUIRE_CHANNEL_MEMBERSHIP
+        value: "true"
